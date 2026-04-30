@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Recon Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0a0c0f;
+    --bg2:       #0f1215;
+    --bg3:       #151a1f;
+    --border:    #1e2530;
+    --border2:   #2a3340;
+    --red:       #ff3b3b;
+    --red-dim:   rgba(255,59,59,0.12);
+    --yellow:    #f0c040;
+    --yellow-dim:rgba(240,192,64,0.12);
+    --cyan:      #30c8c8;
+    --cyan-dim:  rgba(48,200,200,0.12);
+    --green:     #30c870;
+    --text:      #c8d4e0;
+    --text-dim:  #4a5a6a;
+    --text-mid:  #7a8a9a;
+    --mono:      'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── DROP ZONE ─────────────────────────────────────── */
+  #drop-screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg);
+    z-index: 100;
+    transition: opacity .3s;
+  }
+  #drop-screen.hidden { opacity: 0; pointer-events: none; }
+
+  .drop-box {
+    border: 1px dashed var(--border2);
+    border-radius: 4px;
+    padding: 60px 80px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .drop-box:hover, .drop-box.over {
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+  }
+  .drop-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .drop-icon { font-size: 40px; margin-bottom: 16px; color: var(--cyan); }
+  .drop-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .drop-sub { color: var(--text-dim); font-size: 12px; }
+  .brand { font-size: 11px; letter-spacing: .2em; color: var(--text-dim); margin-bottom: 48px; text-transform: uppercase; }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .hdr-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: .1em; }
+  .scan-meta { color: var(--text-dim); font-size: 11px; }
+
+  /* ── STATS BAR ─────────────────────────────────────── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .stat {
+    padding: 14px 20px;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 700; }
+  .stat-val.red { color: var(--red); }
+  .stat-val.yellow { color: var(--yellow); }
+  .stat-val.cyan { color: var(--cyan); }
+  .stat-val.green { color: var(--green); }
+
+  /* ── MAIN ───────────────────────────────────────────── */
+  .main { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 98px); }
+
+  /* ── SIDEBAR ─────────────────────────────────────────── */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .sidebar-section { margin-bottom: 8px; }
+  .sidebar-title {
+    font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--text-dim); padding: 6px 16px; margin-bottom: 2px;
+  }
+  .domain-btn {
+    display: block; width: 100%;
+    padding: 7px 16px;
+    background: none; border: none;
+    color: var(--text-mid); font-family: var(--mono); font-size: 11px;
+    text-align: left; cursor: pointer;
+    transition: background .15s, color .15s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    position: relative;
+  }
+  .domain-btn:hover { background: var(--bg3); color: var(--text); }
+  .domain-btn.active { background: var(--bg3); color: var(--cyan); }
+  .domain-btn .dbadge {
+    float: right; font-size: 10px; padding: 1px 5px;
+    border-radius: 2px; background: var(--bg); color: var(--text-dim);
+  }
+  .domain-btn.has-secrets .dbadge { background: var(--red-dim); color: var(--red); }
+
+  /* ── CONTENT ─────────────────────────────────────────── */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* ── FILTER TABS ─────────────────────────────────────── */
+  .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .tab {
+    padding: 5px 14px; border-radius: 2px; border: 1px solid var(--border);
+    background: none; color: var(--text-dim); font-family: var(--mono);
+    font-size: 11px; cursor: pointer; transition: all .15s; letter-spacing: .05em;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active-secrets { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .tab.active-apis    { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+  .tab.active-sensitive { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+  .tab.active-all     { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+
+  .search-box {
+    margin-left: auto;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--mono); font-size: 12px;
+    padding: 5px 12px; border-radius: 2px; outline: none;
+    width: 220px; transition: border-color .2s;
+  }
+  .search-box:focus { border-color: var(--border2); }
+  .search-box::placeholder { color: var(--text-dim); }
+
+  /* ── CATEGORY GROUP ─────────────────────────────────── */
+  .cat-group { margin-bottom: 20px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 2px; margin-bottom: 1px; cursor: pointer;
+    user-select: none;
+  }
+  .cat-header:hover { border-color: var(--border2); }
+  .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .cat-name { font-weight: 700; font-size: 12px; flex: 1; }
+  .cat-count { font-size: 11px; color: var(--text-dim); }
+  .cat-arrow { color: var(--text-dim); font-size: 10px; transition: transform .2s; }
+  .cat-group.collapsed .cat-arrow { transform: rotate(-90deg); }
+  .cat-group.collapsed .cat-body { display: none; }
+
+  /* ── FINDING CARD ────────────────────────────────────── */
+  .finding {
+    border: 1px solid var(--border);
+    border-radius: 2px; margin-bottom: 4px;
+    background: var(--bg2);
+    transition: border-color .15s;
+  }
+  .finding:hover { border-color: var(--border2); }
+  .finding-head {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; cursor: pointer;
+  }
+  .finding-val {
+    flex: 1; font-size: 12px; word-break: break-all;
+    line-height: 1.5;
+  }
+  .finding-val.red    { color: var(--red); }
+  .finding-val.yellow { color: var(--yellow); }
+  .finding-val.cyan   { color: var(--cyan); }
+  .finding-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .badge {
+    font-size: 10px; padding: 2px 6px; border-radius: 2px;
+    white-space: nowrap;
+  }
+  .badge-line { background: var(--bg3); color: var(--text-dim); border: 1px solid var(--border); }
+  .badge-files { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(240,192,64,.2); }
+
+  .finding-detail {
+    border-top: 1px solid var(--border);
+    padding: 10px 12px; display: none;
+  }
+  .finding.open .finding-detail { display: block; }
+  .detail-row { margin-bottom: 6px; }
+  .detail-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+  .detail-val { font-size: 11px; color: var(--text-mid); word-break: break-all; line-height: 1.5; }
+  .detail-val.highlight { color: var(--text); background: var(--bg3); padding: 6px 8px; border-radius: 2px; display: block; }
+  .copy-btn {
+    display: inline-block; margin-top: 6px;
+    padding: 3px 10px; border: 1px solid var(--border);
+    background: none; color: var(--text-dim); font-family: var(--mono);
+    font-size: 10px; cursor: pointer; border-radius: 2px;
+    transition: all .15s;
+  }
+  .copy-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  .empty { color: var(--text-dim); text-align: center; padding: 40px; font-size: 12px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- DROP SCREEN -->
+<div id="drop-screen">
+  <div class="brand">// JS Recon Dashboard</div>
+  <div class="drop-box" id="drop-box">
+    <input type="file" accept=".json" id="file-input">
+    <div class="drop-icon">⬡</div>
+    <div class="drop-title">Drop js_analysis_report.json</div>
+    <div class="drop-sub">or click to browse</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="hdr-left">
+      <span class="logo">JS_RECON</span>
+      <span class="scan-meta" id="scan-meta"></span>
+    </div>
+    <button class="copy-btn" onclick="reloadFile()">↩ load another</button>
+  </header>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div class="main">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+let DATA = null;
+let activeDomain = '__all__';
+let activeTab = 'all';
+let searchQ = '';
+
+// ── FILE LOADING ───────────────────────────────────────────
+const dropBox = document.getElementById('drop-box');
+const fileInput = document.getElementById('file-input');
+
+dropBox.addEventListener('dragover', e => { e.preventDefault(); dropBox.classList.add('over'); });
+dropBox.addEventListener('dragleave', () => dropBox.classList.remove('over'));
+dropBox.addEventListener('drop', e => {
+  e.preventDefault(); dropBox.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) readFile(f);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) readFile(fileInput.files[0]); });
+
+function readFile(f) {
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      DATA = JSON.parse(e.target.result);
+      init();
+    } catch { alert('Invalid JSON'); }
+  };
+  r.readAsText(f);
+}
+
+function reloadFile() {
+  DATA = null; activeDomain = '__all__'; activeTab = 'all'; searchQ = '';
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('drop-screen').classList.remove('hidden');
+  fileInput.value = '';
+}
+
+// ── INIT ──────────────────────────────────────────────────
+function init() {
+  document.getElementById('drop-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  renderMeta();
+  renderStats();
+  renderSidebar();
+  renderContent();
+}
+
+function renderMeta() {
+  const t = new Date(DATA.scan_time).toLocaleString();
+  document.getElementById('scan-meta').textContent =
+    `${DATA.total_files} files · ${DATA.total_size_mb.toFixed(1)} MB · ${t}`;
+}
+
+function renderStats() {
+  const counts = DATA.counts;
+  const domainCount = DATA.domains;
+  const s = document.getElementById('stats-bar');
+  s.innerHTML = `
+    <div class="stat"><div class="stat-label">Domains</div><div class="stat-val green">${domainCount}</div></div>
+    <div class="stat"><div class="stat-label">Files</div><div class="stat-val">${DATA.total_files}</div></div>
+    <div class="stat"><div class="stat-label">Secrets</div><div class="stat-val red">${counts.secrets}</div></div>
+    <div class="stat"><div class="stat-label">APIs</div><div class="stat-val yellow">${counts.apis}</div></div>
+    <div class="stat"><div class="stat-label">Sensitive</div><div class="stat-val cyan">${counts.sensitive}</div></div>
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${counts.secrets + counts.apis + counts.sensitive}</div></div>
+  `;
+}
+
+// ── ALL FINDINGS flat with domain info ────────────────────
+function getAllFindings() {
+  const result = { secrets: {}, apis: {}, sensitive: {} };
+  for (const cat in DATA.secrets)   result.secrets[cat]   = DATA.secrets[cat];
+  for (const cat in DATA.apis)      result.apis[cat]      = DATA.apis[cat];
+  for (const cat in DATA.sensitive) result.sensitive[cat] = DATA.sensitive[cat];
+  return result;
+}
+
+function getDomainFindings(domain) {
+  const result = { secrets: {}, apis: {}, sensitive: {} };
+  for (const [section, key] of [['secrets','secrets'],['apis','apis'],['sensitive','sensitive']]) {
+    for (const cat in DATA[section]) {
+      const items = DATA[section][cat].filter(f => f.domain === domain);
+      if (items.length) result[key][cat] = items;
+    }
+  }
+  return result;
+}
+
+function getDomainsWithCounts() {
+  const map = {};
+  for (const section of ['secrets','apis','sensitive']) {
+    for (const cat in DATA[section]) {
+      for (const f of DATA[section][cat]) {
+        if (!map[f.domain]) map[f.domain] = { secrets: 0, apis: 0, sensitive: 0 };
+        map[f.domain][section]++;
+      }
+    }
+  }
+  return map;
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function renderSidebar() {
+  const counts = getDomainsWithCounts();
+  const domains = Object.keys(counts).sort();
+  const totalSecrets = DATA.counts.secrets;
+  const totalAll = DATA.counts.secrets + DATA.counts.apis + DATA.counts.sensitive;
+
+  let html = `<div class="sidebar-section">
+    <div class="sidebar-title">Scope</div>
+    <button class="domain-btn ${activeDomain==='__all__'?'active':''}" onclick="setDomain('__all__')">
+      All domains <span class="dbadge">${totalAll}</span>
+    </button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Domains</div>`;
+
+  for (const d of domains) {
+    const c = counts[d];
+    const total = c.secrets + c.apis + c.sensitive;
+    const hasS = c.secrets > 0;
+    html += `<button class="domain-btn ${hasS?'has-secrets':''} ${activeDomain===d?'active':''}"
+      onclick="setDomain('${d}')" title="${d}">
+      ${d.replace(/\..+/,'')}.<span style="opacity:.5">${d.split('.').slice(1).join('.')}</span>
+      <span class="dbadge">${hasS ? '🔴 '+c.secrets : total}</span>
+    </button>`;
+  }
+  html += '</div>';
+  document.getElementById('sidebar').innerHTML = html;
+}
+
+function setDomain(d) {
+  activeDomain = d;
+  renderSidebar();
+  renderContent();
+}
+
+// ── CONTENT ───────────────────────────────────────────────
+function renderContent() {
+  const findings = activeDomain === '__all__' ? getAllFindings() : getDomainFindings(activeDomain);
+  const q = searchQ.toLowerCase();
+
+  // Filter by tab + search
+  function filterCat(section) {
+    const out = {};
+    for (const cat in findings[section]) {
+      const items = findings[section][cat].filter(f =>
+        !q || f.value.toLowerCase().includes(q) ||
+              f.context.toLowerCase().includes(q) ||
+              f.file.toLowerCase().includes(q)
+      );
+      if (items.length) out[cat] = items;
+    }
+    return out;
+  }
+
+  const show = {
+    secrets:   (activeTab === 'all' || activeTab === 'secrets')   ? filterCat('secrets')   : {},
+    apis:      (activeTab === 'all' || activeTab === 'apis')      ? filterCat('apis')      : {},
+    sensitive: (activeTab === 'all' || activeTab === 'sensitive') ? filterCat('sensitive') : {},
+  };
+
+  const sCount = Object.values(show.secrets).reduce((a,b)=>a+b.length,0);
+  const aCount = Object.values(show.apis).reduce((a,b)=>a+b.length,0);
+  const nCount = Object.values(show.sensitive).reduce((a,b)=>a+b.length,0);
+  const total  = sCount + aCount + nCount;
+
+  let html = `<div class="filter-tabs">
+    <button class="tab ${activeTab==='all'?'active-all':''}" onclick="setTab('all')">All (${total})</button>
+    <button class="tab ${activeTab==='secrets'?'active-secrets':''}" onclick="setTab('secrets')">🔴 Secrets (${sCount})</button>
+    <button class="tab ${activeTab==='apis'?'active-apis':''}" onclick="setTab('apis')">🟡 API (${aCount})</button>
+    <button class="tab ${activeTab==='sensitive'?'active-sensitive':''}" onclick="setTab('sensitive')">🔵 Sensitive (${nCount})</button>
+    <input class="search-box" type="text" placeholder="filter..." value="${searchQ}"
+      oninput="setSearch(this.value)">
+  </div>`;
+
+  if (total === 0) {
+    html += `<div class="empty">No findings match current filters.</div>`;
+  } else {
+    if (sCount)   html += renderSection(show.secrets,   'secrets',   'red',    '#ff3b3b');
+    if (aCount)   html += renderSection(show.apis,      'apis',      'yellow', '#f0c040');
+    if (nCount)   html += renderSection(show.sensitive, 'sensitive', 'cyan',   '#30c8c8');
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function renderSection(cats, section, colorClass, colorHex) {
+  let html = '';
+  for (const cat in cats) {
+    const items = cats[cat];
+    html += `<div class="cat-group" id="grp-${section}-${slugify(cat)}">
+      <div class="cat-header" onclick="toggleGroup('grp-${section}-${slugify(cat)}')">
+        <div class="cat-dot" style="background:${colorHex}"></div>
+        <div class="cat-name ${colorClass}">${cat}</div>
+        <div class="cat-count">${items.length} finding${items.length>1?'s':''}</div>
+        <div class="cat-arrow">▾</div>
+      </div>
+      <div class="cat-body">`;
+
+    for (let i = 0; i < items.length; i++) {
+      const f = items[i];
+      const fid = `f-${section}-${slugify(cat)}-${i}`;
+      const fname = f.file.split('/').pop();
+      html += `<div class="finding" id="${fid}">
+        <div class="finding-head" onclick="toggleFinding('${fid}')">
+          <div class="finding-val ${colorClass}">${escHtml(f.value)}</div>
+          <div class="finding-meta">
+            ${f.file_count > 1 ? `<span class="badge badge-files">${f.file_count}f</span>` : ''}
+            <span class="badge badge-line">L${f.line_no}</span>
+          </div>
+        </div>
+        <div class="finding-detail">
+          <div class="detail-row">
+            <div class="detail-label">Value</div>
+            <code class="detail-val highlight">${escHtml(f.value)}</code>
+            <button class="copy-btn" onclick="copyVal(this,'${escAttr(f.value)}')">copy</button>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Context</div>
+            <div class="detail-val">${escHtml(f.context)}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">File · Line ${f.line_no}</div>
+            <div class="detail-val">${escHtml(f.file)}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Domain</div>
+            <div class="detail-val">${escHtml(f.domain)}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  return html;
+}
+
+// ── ACTIONS ───────────────────────────────────────────────
+function setTab(t) { activeTab = t; renderContent(); }
+function setSearch(v) { searchQ = v; renderContent(); }
+
+function toggleGroup(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function toggleFinding(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function copyVal(btn, val) {
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ── UTILS ──────────────────────────────────────────────────
+function slugify(s) { return s.replace(/[^a-z0-9]/gi,'_').toLowerCase(); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
