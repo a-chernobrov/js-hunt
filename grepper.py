@@ -90,6 +90,7 @@ API_PATTERNS = {
     "API Route v1/v2/v3":      r"['\"]/(?:api/)?v[1-9]/[a-zA-Z0-9_/{}:\-]+['\"]",
     "REST Resource":           r"['\"]/(?:api|rest)/[a-z][a-zA-Z0-9_/:\-]{3,}['\"]",
     "HTTP Method + Route":     r"(?i)(?:get|post|put|delete|patch)\s*\(\s*['\"][/][a-z0-9_/{}:.\-]+['\"]",
+    "Relative API Path": r"(?:get|post|put|delete|patch)\s*\(\s*['\"][a-z][a-z0-9_/\-]+\.(?:json|xml|csv|graphql)['\"]",
     "External API Call":       r"(?:axios|fetch)\s*\(\s*['\"]https?://[a-zA-Z0-9.\-]+/[^'\"]{4,}['\"]",
     "GraphQL Query/Mutation":  r"(?:query|mutation)\s+\w+\s*[({]",
     "WebSocket URL":           r"wss?://[a-zA-Z0-9.\-]+/[^\s'\"]{3,}",

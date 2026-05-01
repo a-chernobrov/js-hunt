@@ -5,6 +5,7 @@ Usage: python3 js_recon.py -f subdomains.txt [-w wordlist.txt] [-t 10] [-o outpu
 """
 
 import asyncio
+import shutil
 import argparse
 import sys
 import re
@@ -34,6 +35,19 @@ UA = (
 )
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
+
+def parse_headers(raw: list[str] | None) -> dict:
+    """Convert ['Name: value', 'Name2: value2'] → {'Name': 'value', 'Name2': 'value2'}"""
+    result = {}
+    if not raw:
+        return result
+    for h in raw:
+        if ":" not in h:
+            continue
+        key, _, val = h.partition(":")
+        result[key.strip()] = val.strip()
+    return result
+
 
 def normalize(subdomain: str) -> str:
     """Ensure subdomain has an https:// scheme; try http as fallback later."""
@@ -72,16 +86,27 @@ def is_obvious_js(url: str) -> bool:
 
 # ─── Stage 1: Playwright JS collection ───────────────────────────────────────
 
-async def collect_js_playwright(url: str, timeout: int = 20) -> list[str]:
+async def collect_js_playwright(url: str, timeout: int = 20, custom_headers: dict | None = None) -> list[str]:
     """Open URL in headless Chromium, intercept all .js requests."""
     js_urls: list[str] = []
+
+    pw_headers = {"Accept-Language": "en-US,en;q=0.9"}
+    if custom_headers:
+        # Custom headers may override User-Agent for Playwright
+        if "User-Agent" in custom_headers:
+            pw_ua = custom_headers.pop("User-Agent")
+        else:
+            pw_ua = UA
+        pw_headers.update(custom_headers)
+    else:
+        pw_ua = UA
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=["--no-sandbox"])
         ctx = await browser.new_context(
-            user_agent=UA,
-            ignore_https_errors=True,      # self-signed certs
-            extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
+            user_agent=pw_ua,
+            ignore_https_errors=True,
+            extra_http_headers=pw_headers,
         )
         page = await ctx.new_page()
 
@@ -131,44 +156,124 @@ async def collect_js_playwright(url: str, timeout: int = 20) -> list[str]:
 
 # ─── Stage 2: Brute-force sibling JS files ───────────────────────────────────
 
+import hashlib
+from uuid import uuid4
+
+class Soft404Baseline:
+    """Fingerprint of a soft-404 response for one base directory."""
+    def __init__(self, status: int, size: int, body_hash: str,
+                 content_type: str, final_url: str):
+        self.status       = status
+        self.size         = size
+        self.body_hash    = body_hash
+        self.content_type = content_type
+        self.final_url    = final_url
+
+    def is_soft404(self, status: int, size: int, body_hash: str,
+                   content_type: str, final_url: str) -> bool:
+        # Exact body hash match → definitely soft 404
+        if body_hash == self.body_hash:
+            return True
+        # Redirected to same place as canary
+        if final_url and final_url == self.final_url:
+            return True
+        # HTML content-type on a .js request → soft 404
+        if "html" in content_type and "javascript" not in content_type:
+            return True
+        # Size within 2% of canary → treat as soft 404
+        if self.size > 0 and abs(size - self.size) / self.size < 0.02:
+            return True
+        return False
+
+
+async def get_soft404_baseline(
+    client: httpx.AsyncClient,
+    base_dir: str,
+) -> Soft404Baseline | None:
+    """Request a random filename that cannot exist to capture soft-404 signature."""
+    canary_url = f"{base_dir}{uuid4().hex}.js"
+    try:
+        r = await client.get(canary_url, timeout=8, follow_redirects=True)
+        body  = r.content
+        return Soft404Baseline(
+            status       = r.status_code,
+            size         = len(body),
+            body_hash    = hashlib.md5(body).hexdigest(),
+            content_type = r.headers.get("content-type", ""),
+            final_url    = str(r.url),
+        )
+    except Exception:
+        return None
+
+
 async def brute_js_names(
     base_dirs: list[str],
     wordlist: list[str],
     concurrency: int = 20,
+    custom_headers: dict | None = None,
 ) -> list[str]:
     """
-    For each base directory, try wordlist filenames with .js extension.
-    Return URLs that respond with status 200 and JS content-type.
+    For each base directory:
+      1. Probe a canary URL to fingerprint soft-404 responses
+      2. Brute wordlist, skipping responses that match the canary
     """
     found: list[str] = []
     sem = asyncio.Semaphore(concurrency)
 
-    async def probe(client: httpx.AsyncClient, url: str):
-        async with sem:
-            try:
-                r = await client.get(url, timeout=8, follow_redirects=True)
-                ct = r.headers.get("content-type", "")
-                if r.status_code == 200 and (
-                    "javascript" in ct or url.endswith(".js")
-                ):
-                    found.append(url)
-            except Exception:
-                pass
-
     limits = httpx.Limits(max_connections=50, max_keepalive_connections=20)
+    req_headers = {"User-Agent": UA}
+    if custom_headers:
+        req_headers.update(custom_headers)
+
     async with httpx.AsyncClient(
         verify=False,
-        headers={"User-Agent": UA},
+        headers=req_headers,
         limits=limits,
     ) as client:
+
+        # Build baselines per directory
+        baselines: dict[str, Soft404Baseline | None] = {}
+        for base in base_dirs:
+            baselines[base] = await get_soft404_baseline(client, base)
+            bl = baselines[base]
+            if bl:
+                verdict = "soft-404 detected" if bl.status == 200 else f"status={bl.status}"
+                print(f"  [baseline] {base} → {verdict} (size={bl.size}, ct={bl.content_type.split(';')[0]})")
+
+        async def probe(url: str, base: str):
+            async with sem:
+                try:
+                    r = await client.get(url, timeout=8, follow_redirects=True)
+                    if r.status_code != 200:
+                        return
+                    body = r.content
+                    ct   = r.headers.get("content-type", "")
+                    # Must look like JS
+                    if "javascript" not in ct and not url.endswith(".js"):
+                        return
+                    # Check against baseline
+                    bl = baselines.get(base)
+                    if bl is not None:
+                        if bl.is_soft404(
+                            status       = r.status_code,
+                            size         = len(body),
+                            body_hash    = hashlib.md5(body).hexdigest(),
+                            content_type = ct,
+                            final_url    = str(r.url),
+                        ):
+                            return
+                    found.append(url)
+                except Exception:
+                    pass
+
         tasks = []
-        seen = set()
+        seen  = set()
         for base in base_dirs:
             for name in wordlist:
                 candidate = f"{base}{name}.js"
                 if candidate not in seen:
                     seen.add(candidate)
-                    tasks.append(probe(client, candidate))
+                    tasks.append(probe(candidate, base))
         await asyncio.gather(*tasks)
 
     return found
@@ -290,7 +395,7 @@ async def process_sourcemap(
         print(f"  [src] Extracted {saved} source file(s) → {sources_dir}")
 
 
-async def download_js_files(urls: list[str], domain_dir: Path):
+async def download_js_files(urls: list[str], domain_dir: Path, custom_headers: dict | None = None):
     js_dir = domain_dir / "js"
     js_dir.mkdir(parents=True, exist_ok=True)
 
@@ -307,7 +412,10 @@ async def download_js_files(urls: list[str], domain_dir: Path):
             pass
         return None, None
 
-    async with httpx.AsyncClient(verify=False, headers={"User-Agent": UA}) as client:
+    req_headers = {"User-Agent": UA}
+    if custom_headers:
+        req_headers.update(custom_headers)
+    async with httpx.AsyncClient(verify=False, headers=req_headers) as client:
         results = await asyncio.gather(*[fetch(client, u) for u in urls])
         ok = [(url, content) for url, content in results if url]
         print(f"  [+] Downloaded {len(ok)}/{len(urls)} JS file(s) → {js_dir}")
@@ -326,6 +434,7 @@ async def process_subdomain(
     semaphore: asyncio.Semaphore,
     verbose: bool,
     download: bool,
+    custom_headers: dict | None = None,
 ):
     url = normalize(raw)
     if not url:
@@ -337,7 +446,7 @@ async def process_subdomain(
 
         # Stage 1 — collect JS via headless browser
         try:
-            js_urls = await collect_js_playwright(url, timeout=timeout)
+            js_urls = await collect_js_playwright(url, timeout=timeout, custom_headers=custom_headers)
         except Exception as e:
             print(f"  [!] Playwright error: {e}", file=sys.stderr)
             js_urls = []
@@ -356,7 +465,7 @@ async def process_subdomain(
         bruted: list[str] = []
         if base_dirs:
             print(f"  [*] Bruting {len(wordlist)} names in {len(base_dirs)} dir(s)…")
-            bruted = await brute_js_names(base_dirs, wordlist)
+            bruted = await brute_js_names(base_dirs, wordlist, custom_headers=custom_headers)
             # Exclude already-known URLs
             bruted = [u for u in bruted if u not in js_urls]
             if verbose:
@@ -372,10 +481,42 @@ async def process_subdomain(
         # Download if requested
         if download:
             all_js = list(set(target_js + bruted))
-            await download_js_files(all_js, output_dir / slug)
+            await download_js_files(all_js, output_dir / slug, custom_headers=custom_headers)
 
 
 # ─── Entry point ─────────────────────────────────────────────────────────────
+
+
+def cleanup_empty_domains(output_dir: Path) -> list[str]:
+    """Remove domain dirs where nothing was found (empty js_files.txt + no js/ dir)."""
+    removed = []
+    for domain_dir in sorted(output_dir.iterdir()):
+        if not domain_dir.is_dir():
+            continue
+
+        js_files_txt = domain_dir / "js_files.txt"
+        bruted_txt   = domain_dir / "bruteforced.txt"
+        js_dir       = domain_dir / "js"
+        sources_dir  = domain_dir / "sources"
+
+        # Check if any real content exists
+        has_js_urls = (
+            js_files_txt.exists() and
+            js_files_txt.read_text().strip() not in ("", "\n")
+        )
+        has_bruted = (
+            bruted_txt.exists() and
+            bruted_txt.read_text().strip() not in ("", "\n")
+        )
+        has_js_files  = js_dir.exists() and any(js_dir.rglob("*.js"))
+        has_sources   = sources_dir.exists() and any(sources_dir.rglob("*"))
+
+        if not (has_js_urls or has_bruted or has_js_files or has_sources):
+            shutil.rmtree(domain_dir)
+            removed.append(domain_dir.name)
+
+    return removed
+
 
 async def main():
     parser = argparse.ArgumentParser(
@@ -389,6 +530,8 @@ async def main():
     parser.add_argument("-o", "--output", default="output", help="Output directory (default: ./output)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print every JS URL found")
     parser.add_argument("-d", "--download", action="store_true", help="Download all collected JS files")
+    parser.add_argument("-H", "--header", action="append", default=None, metavar="'Name: value'",
+                        help="Custom HTTP header (repeatable, e.g. -H 'Cookie: x=y' -H 'Authorization: Bearer x')")
     args = parser.parse_args()
 
     # Load target(s)
@@ -414,14 +557,24 @@ async def main():
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    headers = parse_headers(args.header)
+
     sem = asyncio.Semaphore(args.concurrency)
     tasks = [
-        process_subdomain(sub, output_dir, wordlist, args.timeout, sem, args.verbose, args.download)
+        process_subdomain(sub, output_dir, wordlist, args.timeout, sem, args.verbose, args.download, custom_headers=headers)
         for sub in subdomains
     ]
 
     print(f"[*] Starting recon on {len(subdomains)} subdomain(s)\n")
     await asyncio.gather(*tasks)
+
+    # Cleanup empty domain directories
+    cleaned = cleanup_empty_domains(output_dir)
+    if cleaned:
+        print(f"[*] Cleaned up {len(cleaned)} empty domain dir(s):")
+        for d in cleaned:
+            print(f"  [-] {d}")
+
     print("\n[✓] Done.")
 
 
