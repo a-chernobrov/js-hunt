@@ -16,7 +16,61 @@ from pathlib import Path
 from urllib.parse import urlparse, urljoin
 from playwright.async_api import async_playwright
 
+# ── HTTP Timeouts ─────────────────────────────────────────
+# Split connect/read to avoid hanging on servers that accept but don't respond
+_T_FAST   = httpx.Timeout(connect=4.0, read=6.0,  write=4.0, pool=4.0)  # brute/probe
+_T_NORMAL = httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0)  # downloads/maps
+
+# ── ANSI Colors ───────────────────────────────────────────
+_C_RED    = "[91m"
+_C_YELLOW = "[93m"
+_C_CYAN   = "[96m"
+_C_GREEN  = "[92m"
+_C_BOLD   = "[1m"
+_C_DIM    = "[2m"
+_C_RESET  = "[0m"
+
+def _c(color: str, text: str) -> str:
+    return f"{color}{text}{_C_RESET}"
+
+# Per-coroutine domain prefix via contextvars (safe for parallel execution)
+import contextvars
+from concurrent.futures import ProcessPoolExecutor
+_PREFIX_VAR: contextvars.ContextVar[str] = contextvars.ContextVar("prefix", default="")
+
+def _pfx() -> str:
+    p = _PREFIX_VAR.get()
+    return f"{_c(_C_DIM, '[' + p + ']')} " if p else "  "
+
+def _ok(msg: str):   print(f"{_pfx()}{_c(_C_GREEN,  '[+]')} {msg}")
+def _hit(msg: str):  print(f"{_pfx()}{_c(_C_YELLOW, '[!]')} {msg}")
+def _info(msg: str): print(f"{_pfx()}{_c(_C_CYAN,   '[*]')} {msg}")
+
+def _map(method: str, src: str, dst):
+    label = f"{_C_YELLOW}{_C_BOLD}[map:{method}]{_C_RESET}"
+    print(f"{_pfx()}{label} {src}")
+    print(f"{_pfx()}       → {_c(_C_DIM, str(dst))}")
+
+def _src(n: int, dst):
+    label = f"{_C_GREEN}{_C_BOLD}[src]{_C_RESET}"
+    print(f"{_pfx()}{label} Extracted {_c(_C_GREEN, str(n))} source file(s) → {_c(_C_DIM, str(dst))}")
+
+
 # ─── Default JS wordlist (filename brute) ────────────────────────────────────
+# Common Next.js page routes for /_next/data/ brute fallback
+NEXT_DATA_WORDLIST = [
+    "index", "home", "about", "contact", "faq", "pricing",
+    "login", "signin", "signup", "register", "logout",
+    "dashboard", "profile", "account", "settings", "preferences",
+    "admin", "users", "user", "orders", "order", "products", "product",
+    "blog", "posts", "post", "news", "articles", "article",
+    "search", "results", "catalog", "category", "categories",
+    "cart", "checkout", "payment", "invoice", "invoices",
+    "api", "docs", "documentation", "help", "support",
+    "terms", "privacy", "cookies", "legal",
+    "404", "500", "error",
+]
+
 DEFAULT_WORDLIST = [
     "app", "main", "index", "bundle", "chunk", "vendor", "runtime",
     "common", "utils", "helpers", "config", "api", "auth", "login",
@@ -85,73 +139,101 @@ def is_obvious_js(url: str) -> bool:
 
 
 # ─── Stage 1: Playwright JS collection ───────────────────────────────────────
+# Runs in a separate process via ProcessPoolExecutor to prevent event loop blocking
 
-async def collect_js_playwright(url: str, timeout: int = 20, custom_headers: dict | None = None) -> list[str]:
-    """Open URL in headless Chromium, intercept all .js requests."""
+def _playwright_worker(url: str, timeout: int, custom_headers: dict | None) -> tuple[list[str], str | None]:
+    """
+    Sync Playwright worker — runs in a subprocess.
+    Returns (js_urls, build_id).
+    """
+    import asyncio
+    from playwright.sync_api import sync_playwright
+
     js_urls: list[str] = []
+    page_build_id: str | None = None
 
     pw_headers = {"Accept-Language": "en-US,en;q=0.9"}
+    pw_ua = UA
     if custom_headers:
-        # Custom headers may override User-Agent for Playwright
         if "User-Agent" in custom_headers:
             pw_ua = custom_headers.pop("User-Agent")
-        else:
-            pw_ua = UA
         pw_headers.update(custom_headers)
-    else:
-        pw_ua = UA
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True, args=["--no-sandbox"])
-        ctx = await browser.new_context(
-            user_agent=pw_ua,
-            ignore_https_errors=True,
-            extra_http_headers=pw_headers,
-        )
-        page = await ctx.new_page()
-
-        def on_request(req):
-            if req.resource_type == "script":
-                u = req.url
-                if u not in js_urls:
-                    js_urls.append(u)
-
-        page.on("request", on_request)
-
-        try:
-            resp = await page.goto(
-                url,
-                timeout=timeout * 1000,
-                wait_until="networkidle",
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx = browser.new_context(
+                user_agent=pw_ua,
+                ignore_https_errors=True,
+                extra_http_headers=pw_headers,
             )
-            # If https failed, retry http
-            if resp is None or resp.status >= 400:
-                if url.startswith("https://"):
-                    fallback = url.replace("https://", "http://", 1)
-                    await page.goto(
-                        fallback,
-                        timeout=timeout * 1000,
-                        wait_until="networkidle",
-                    )
-            # Extra wait for lazy-loaded scripts
-            await page.wait_for_timeout(2000)
-        except Exception:
-            # Try http fallback silently
-            if url.startswith("https://"):
-                try:
-                    fallback = url.replace("https://", "http://", 1)
-                    await page.goto(
-                        fallback,
-                        timeout=timeout * 1000,
-                        wait_until="networkidle",
-                    )
-                    await page.wait_for_timeout(2000)
-                except Exception:
-                    pass
-        finally:
-            await browser.close()
+            page = ctx.new_page()
 
-    return js_urls
+            def on_request(req):
+                if req.resource_type == "script":
+                    u = req.url
+                    if not u.startswith("blob:") and u not in js_urls:
+                        js_urls.append(u)
+
+            page.on("request", on_request)
+
+            def _goto(target: str) -> bool:
+                try:
+                    resp = page.goto(
+                        target,
+                        timeout=timeout * 1000,
+                        wait_until="domcontentloaded",
+                    )
+                    page.wait_for_timeout(1000)
+                    return resp is not None and resp.status < 400
+                except Exception:
+                    return False
+
+            ok = _goto(url)
+            if not ok and url.startswith("https://"):
+                _goto(url.replace("https://", "http://", 1))
+
+            # Extract buildId from __NEXT_DATA__
+            try:
+                next_data = page.evaluate("""
+                    () => {
+                        const el = document.getElementById('__NEXT_DATA__');
+                        if (!el) return null;
+                        try { return JSON.parse(el.textContent); } catch(e) { return null; }
+                    }
+                """)
+                if next_data and isinstance(next_data, dict):
+                    page_build_id = next_data.get("buildId")
+            except Exception:
+                pass
+
+            browser.close()
+    except Exception:
+        pass
+
+    return js_urls, page_build_id
+
+
+async def collect_js_playwright(
+    url: str,
+    timeout: int = 20,
+    custom_headers: dict | None = None,
+    executor=None,
+) -> tuple[list[str], str | None]:
+    """
+    Async wrapper — runs _playwright_worker in a separate process.
+    Hard kill via executor timeout prevents event loop blocking.
+    """
+    loop = asyncio.get_running_loop()
+    hard_timeout = timeout + 10  # OS-level kill if process hangs
+    try:
+        result = await asyncio.wait_for(
+            loop.run_in_executor(executor, _playwright_worker, url, timeout, custom_headers),
+            timeout=hard_timeout,
+        )
+        return result
+    except (asyncio.TimeoutError, Exception):
+        return [], None
 
 
 # ─── Stage 2: Brute-force sibling JS files ───────────────────────────────────
@@ -193,7 +275,7 @@ async def get_soft404_baseline(
     """Request a random filename that cannot exist to capture soft-404 signature."""
     canary_url = f"{base_dir}{uuid4().hex}.js"
     try:
-        r = await client.get(canary_url, timeout=8, follow_redirects=True)
+        r = await client.get(canary_url, timeout=_T_FAST, follow_redirects=True)
         body  = r.content
         return Soft404Baseline(
             status       = r.status_code,
@@ -210,6 +292,8 @@ async def brute_js_names(
     base_dirs: list[str],
     wordlist: list[str],
     concurrency: int = 20,
+    delay: float = 0.0,
+    proxy: str | None = None,
     custom_headers: dict | None = None,
 ) -> list[str]:
     """
@@ -225,11 +309,15 @@ async def brute_js_names(
     if custom_headers:
         req_headers.update(custom_headers)
 
-    async with httpx.AsyncClient(
+    client_kwargs = dict(
         verify=False,
         headers=req_headers,
         limits=limits,
-    ) as client:
+    )
+    if proxy:
+        client_kwargs["proxy"] = proxy
+
+    async with httpx.AsyncClient(**client_kwargs) as client:
 
         # Build baselines per directory
         baselines: dict[str, Soft404Baseline | None] = {}
@@ -238,12 +326,14 @@ async def brute_js_names(
             bl = baselines[base]
             if bl:
                 verdict = "soft-404 detected" if bl.status == 200 else f"status={bl.status}"
-                print(f"  [baseline] {base} → {verdict} (size={bl.size}, ct={bl.content_type.split(';')[0]})")
+                print(f"{_pfx()}{_c(_C_DIM, '[baseline]')} {base} → {_c(_C_YELLOW if bl.status==200 else _C_DIM, verdict)} (size={bl.size}, ct={bl.content_type.split(';')[0]})")
 
         async def probe(url: str, base: str):
             async with sem:
+                if delay > 0:
+                    await asyncio.sleep(delay)
                 try:
-                    r = await client.get(url, timeout=8, follow_redirects=True)
+                    r = await client.get(url, timeout=_T_FAST, follow_redirects=True)
                     if r.status_code != 200:
                         return
                     body = r.content
@@ -294,6 +384,30 @@ def save_results(output_dir: Path, slug: str, js_list: list[str], bruted: list[s
     return js_file, brute_file
 
 
+def is_valid_sourcemap(data: bytes) -> bool:
+    """Check if response body looks like a real source map (not a soft-404 HTML page)."""
+    try:
+        text = data[:512].decode("utf-8", errors="replace").strip()
+    except Exception:
+        return False
+    # Must start with { (JSON object)
+    if not text.startswith("{"):
+        return False
+    try:
+        obj = json.loads(data)
+    except Exception:
+        return False
+    # Must have at least 2 of: version==3, sources, mappings
+    score = 0
+    if obj.get("version") == 3:
+        score += 1
+    if isinstance(obj.get("sources"), list):
+        score += 1
+    if isinstance(obj.get("mappings"), str):
+        score += 1
+    return score >= 2
+
+
 def extract_sourcemap_url(content: bytes) -> str | None:
     tail = content[-4096:]
     try:
@@ -302,6 +416,15 @@ def extract_sourcemap_url(content: bytes) -> str | None:
         return None
     m = re.search(r"//[#@]\s*sourceMappingURL=([^\s]+)", text)
     return m.group(1).strip() if m else None
+
+
+def extract_sourcemap_header(headers) -> str | None:
+    """Check HTTP response headers for SourceMap / X-SourceMap."""
+    for hdr in ("sourcemap", "x-sourcemap"):
+        val = headers.get(hdr)
+        if val:
+            return val.strip()
+    return None
 
 
 def resolve_map_url(js_url: str, mapping_url: str) -> str | None:
@@ -334,55 +457,46 @@ def extract_inline_map(mapping_url: str) -> dict | None:
         return None
 
 
-async def process_sourcemap(
-    js_url: str,
-    js_content: bytes,
+async def fetch_and_extract_map(
+    map_url: str,
+    js_filename: str,
     domain_dir: Path,
     client: httpx.AsyncClient,
-):
-    mapping_url = extract_sourcemap_url(js_content)
-    if not mapping_url:
-        return
-
-    js_filename = urlparse(js_url).path.rsplit("/", 1)[-1]
+    tag: str = "map",
+) -> bool:
+    """Download a .map URL, validate it's a real sourcemap, extract sources. Returns True on success."""
     sourcemaps_dir = domain_dir / "sourcemaps"
-    sources_dir = domain_dir / "sources"
+    sources_dir    = domain_dir / "sources"
     sourcemaps_dir.mkdir(parents=True, exist_ok=True)
     sources_dir.mkdir(parents=True, exist_ok=True)
 
-    if mapping_url.startswith("data:"):
-        map_data = extract_inline_map(mapping_url)
-        if map_data:
-            map_path = sourcemaps_dir / f"{js_filename}.map"
-            map_path.write_text(json.dumps(map_data, ensure_ascii=False, indent=2))
-            print(f"  [map] inline → {map_path}")
-    else:
-        resolved = resolve_map_url(js_url, mapping_url)
-        if not resolved:
-            return
-        try:
-            r = await client.get(resolved, timeout=15, follow_redirects=True)
-            if r.status_code != 200:
-                return
-            map_raw = r.content
-            map_path = sourcemaps_dir / f"{js_filename}.map"
-            map_path.write_bytes(map_raw)
-            print(f"  [map] {resolved} → {map_path}")
-            try:
-                map_data = json.loads(map_raw)
-            except Exception:
-                return
-        except Exception:
-            return
+    try:
+        r = await client.get(map_url, timeout=_T_NORMAL, follow_redirects=True)
+        if r.status_code != 200:
+            return False
+        map_raw = r.content
+    except Exception:
+        return False
 
-    sources = map_data.get("sources", [])
+    if not is_valid_sourcemap(map_raw):
+        return False
+
+    try:
+        map_data = json.loads(map_raw)
+    except Exception:
+        return False
+
+    map_path = sourcemaps_dir / f"{js_filename}.map"
+    map_path.write_bytes(map_raw)
+    _map(tag, map_url, map_path)
+
+    sources  = map_data.get("sources", [])
     contents = map_data.get("sourcesContent", [])
-
     saved = 0
     for i, src_path in enumerate(sources):
         if not src_path:
             continue
-        src_path = re.sub(r"^(webpack://|webpack:///|\.\/)", "", src_path)
+        src_path = re.sub(r"^(webpack://[^/]*/|webpack:///|\./)", "", src_path)
         content_str = contents[i] if i < len(contents) and contents[i] is not None else None
         if content_str is None:
             continue
@@ -392,7 +506,53 @@ async def process_sourcemap(
         saved += 1
 
     if saved:
-        print(f"  [src] Extracted {saved} source file(s) → {sources_dir}")
+        _src(saved, sources_dir)
+    return True
+
+
+async def process_sourcemap(
+    js_url: str,
+    js_content: bytes,
+    js_resp_headers,
+    domain_dir: Path,
+    client: httpx.AsyncClient,
+):
+    js_filename = urlparse(js_url).path.rsplit("/", 1)[-1]
+    sourcemaps_dir = domain_dir / "sourcemaps"
+    sources_dir    = domain_dir / "sources"
+
+    # --- Method 1: inline data URI in JS body ---
+    mapping_url = extract_sourcemap_url(js_content)
+    if mapping_url and mapping_url.startswith("data:"):
+        map_data = extract_inline_map(mapping_url)
+        if map_data:
+            sourcemaps_dir.mkdir(parents=True, exist_ok=True)
+            sources_dir.mkdir(parents=True, exist_ok=True)
+            map_path = sourcemaps_dir / f"{js_filename}.map"
+            map_path.write_text(json.dumps(map_data, ensure_ascii=False, indent=2))
+            _map("inline", "data:...", map_path)
+        return
+
+    # --- Method 2: sourceMappingURL comment in JS body ---
+    if mapping_url:
+        resolved = resolve_map_url(js_url, mapping_url)
+        if resolved:
+            if await fetch_and_extract_map(resolved, js_filename, domain_dir, client, tag="map"):
+                return
+
+    # --- Method 3: SourceMap / X-SourceMap HTTP header ---
+    header_map = extract_sourcemap_header(js_resp_headers)
+    if header_map:
+        resolved = resolve_map_url(js_url, header_map)
+        if resolved:
+            if await fetch_and_extract_map(resolved, js_filename, domain_dir, client, tag="hdr"):
+                return
+
+    # --- Method 4: brute {js_url}.map directly ---
+    brute_map_url = js_url + ".map"
+    await fetch_and_extract_map(brute_map_url, js_filename, domain_dir, client, tag="brute")
+
+
 
 
 async def download_js_files(urls: list[str], domain_dir: Path, custom_headers: dict | None = None):
@@ -403,25 +563,37 @@ async def download_js_files(urls: list[str], domain_dir: Path, custom_headers: d
 
     async def fetch(client: httpx.AsyncClient, url: str):
         try:
-            r = await client.get(url, timeout=15, follow_redirects=True)
+            r = await client.get(url, timeout=_T_NORMAL, follow_redirects=True)
             if r.status_code == 200:
                 path = urlparse(url).path.lstrip("/").replace("/", "_")
                 (js_dir / path).write_bytes(r.content)
-                return url, r.content
+                return url, r.content, r.headers
         except Exception:
             pass
-        return None, None
+        return None, None, None
 
     req_headers = {"User-Agent": UA}
     if custom_headers:
         req_headers.update(custom_headers)
     async with httpx.AsyncClient(verify=False, headers=req_headers) as client:
-        results = await asyncio.gather(*[fetch(client, u) for u in urls])
-        ok = [(url, content) for url, content in results if url]
-        print(f"  [+] Downloaded {len(ok)}/{len(urls)} JS file(s) → {js_dir}")
+        try:
+            async with asyncio.timeout(90):
+                results = await asyncio.gather(*[fetch(client, u) for u in urls])
+        except asyncio.TimeoutError:
+            results = []
+            _hit("Download timeout — skipping remaining files")
+        ok = [(url, body, hdrs) for url, body, hdrs in results if url]
+        _ok(f"Downloaded {_c(_C_GREEN, str(len(ok)))}/{len(urls)} JS file(s) → {_c(_C_DIM, str(js_dir))}")
 
-        for js_url, js_content in ok:
-            await process_sourcemap(js_url, js_content, domain_dir, client)
+        if ok:
+            try:
+                async with asyncio.timeout(120):
+                    await asyncio.gather(*[
+                        process_sourcemap(js_url, js_content, js_headers, domain_dir, client)
+                        for js_url, js_content, js_headers in ok
+                    ])
+            except asyncio.TimeoutError:
+                _hit("Sourcemap processing timeout — skipping")
 
 
 
@@ -435,6 +607,10 @@ async def process_subdomain(
     verbose: bool,
     download: bool,
     custom_headers: dict | None = None,
+    proxy: str | None = None,
+    brute_concurrency: int = 20,
+    brute_delay: float = 0.0,
+    pw_executor=None,
 ):
     url = normalize(raw)
     if not url:
@@ -442,20 +618,24 @@ async def process_subdomain(
 
     slug = domain_slug(url)
     async with semaphore:
-        print(f"[*] {url}")
+        _PREFIX_VAR.set(slug)
+        print(f"{_c(_C_DIM, '[' + slug + ']')} {_C_BOLD}[*]{_C_RESET} {url}")
 
         # Stage 1 — collect JS via headless browser
         try:
-            js_urls = await collect_js_playwright(url, timeout=timeout, custom_headers=custom_headers)
+            js_urls, page_build_id = await collect_js_playwright(
+                url, timeout=timeout, custom_headers=custom_headers,
+                executor=pw_executor,
+            )
         except Exception as e:
-            print(f"  [!] Playwright error: {e}", file=sys.stderr)
-            js_urls = []
+            print(f"{_pfx()}{_c(_C_RED, "[!]")} Playwright error: {e}", file=sys.stderr)
+            js_urls, page_build_id = [], None
 
         if verbose:
             for u in js_urls:
-                print(f"  [js] {u}")
+                print(f"{_pfx()}{_c(_C_CYAN, "[js]")} {u}")
 
-        print(f"  [+] Found {len(js_urls)} JS file(s)")
+        _ok(f"Found {_c(_C_GREEN, str(len(js_urls)))} JS file(s)")
 
         # Stage 2 — brute all dirs from target host only (skip CDNs)
         target_host = urlparse(url).netloc
@@ -464,24 +644,235 @@ async def process_subdomain(
 
         bruted: list[str] = []
         if base_dirs:
-            print(f"  [*] Bruting {len(wordlist)} names in {len(base_dirs)} dir(s)…")
-            bruted = await brute_js_names(base_dirs, wordlist, custom_headers=custom_headers)
+            _info(f"Bruting {len(wordlist)} names in {len(base_dirs)} dir(s)…")
+            bruted = await brute_js_names(base_dirs, wordlist,
+                                              concurrency=brute_concurrency,
+                                              delay=brute_delay,
+                                              proxy=proxy,
+                                              custom_headers=custom_headers)
             # Exclude already-known URLs
             bruted = [u for u in bruted if u not in js_urls]
             if verbose:
                 for u in bruted:
                     print(f"  [brute] {u}")
-            print(f"  [+] Brute found {len(bruted)} new JS file(s)")
+            _ok(f"Brute found {_c(_C_YELLOW if bruted else _C_DIM, str(len(bruted)))} new JS file(s)")
 
         # Save — only target-domain JS in js_files.txt
         js_f, br_f = save_results(output_dir, slug, target_js, bruted)
-        print(f"  [>] {js_f}")
-        print(f"  [>] {br_f}")
+        print(f"{_pfx()}{_c(_C_DIM, "[>]")} {js_f}")
+        print(f"{_pfx()}{_c(_C_DIM, "[>]")} {br_f}")
 
         # Download if requested
         if download:
             all_js = list(set(target_js + bruted))
             await download_js_files(all_js, output_dir / slug, custom_headers=custom_headers)
+
+        # Next.js: buildId + routes + data endpoints
+        req_headers = {"User-Agent": UA}
+        if custom_headers:
+            req_headers.update(custom_headers)
+        async with httpx.AsyncClient(verify=False, headers=req_headers) as client:
+            try:
+                async with asyncio.timeout(120):
+                    await process_nextjs(url, target_js + bruted, output_dir / slug, client,
+                                         hint_build_id=page_build_id,
+                                         wordlist=wordlist)
+            except asyncio.TimeoutError:
+                print(f"{_pfx()}{_c(_C_YELLOW, '[next] timeout — skipping')}")
+
+
+
+# ─── Next.js buildManifest + data endpoints ──────────────────────────────────
+
+def extract_build_id(js_urls: list[str]) -> str | None:
+    """Extract buildId from _buildManifest.js or _ssgManifest.js URL."""
+    for u in js_urls:
+        m = re.search(r"/_next/static/([^/]+)/_(buildManifest|ssgManifest)\.js", u)
+        if m:
+            return m.group(1)
+    return None
+
+
+async def fetch_build_manifest(base_url: str, build_id: str,
+                                client: httpx.AsyncClient) -> dict | None:
+    """Download and parse _buildManifest.js → {route: [chunks]}."""
+    url = f"{base_url}/_next/static/{build_id}/_buildManifest.js"
+    try:
+        r = await client.get(url, timeout=_T_FAST, follow_redirects=True)
+        if r.status_code != 200:
+            return None
+        text = r.text
+        # self.__BUILD_MANIFEST={...} or self.__BUILD_MANIFEST_CB&&...
+        m = re.search(r"self\.__BUILD_MANIFEST\s*=\s*(\{.*?\})\s*[,;]", text, re.DOTALL)
+        if not m:
+            return None
+        # Replace JS syntax to valid JSON
+        raw = m.group(1)
+        raw = re.sub(r",\s*}", "}", raw)   # trailing commas
+        raw = re.sub(r",\s*]", "]", raw)
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+def extract_routes(manifest: dict) -> list[str]:
+    """Extract page routes from buildManifest (keys starting with /)."""
+    routes = []
+    for key in manifest:
+        if key.startswith("/") and not key.startswith("/_"):
+            routes.append(key)
+    return sorted(routes)
+
+
+async def probe_next_data(base_url: str, build_id: str, routes: list[str],
+                           domain_dir: Path, client: httpx.AsyncClient):
+    """
+    Probe /_next/data/{buildId}/{route}.json for each route.
+    Save responses that return real JSON data.
+    """
+    data_dir = domain_dir / "next_data"
+    data_dir.mkdir(exist_ok=True)
+
+    hits  = 0
+    total = len(routes)
+    sem   = asyncio.Semaphore(10)
+
+    _info(f"Probing {total} /_next/data/ route(s)…")
+
+    async def probe(route: str):
+        nonlocal hits
+        path = route.strip("/") or "index"
+        url  = f"{base_url}/_next/data/{build_id}/{path}.json"
+        async with sem:
+            try:
+                r = await client.get(url, timeout=_T_FAST, follow_redirects=True)
+                if r.status_code != 200:
+                    return
+                ct = r.headers.get("content-type", "")
+                if "json" not in ct:
+                    return
+                try:
+                    data = r.json()
+                except Exception:
+                    return
+                props = data.get("pageProps", {})
+                if not props:
+                    return
+                fname = path.replace("/", "_") + ".json"
+                (data_dir / fname).write_text(
+                    json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
+                hits += 1
+                label = f"{_C_GREEN}{_C_BOLD}[data]{_C_RESET}"
+                print(f"{_pfx()}{label} {_c(_C_GREEN, url)} → {_c(_C_DIM, str(data_dir / fname))}")
+            except Exception:
+                pass
+
+    # Global timeout for entire probing stage
+    GLOBAL_TIMEOUT = 60  # seconds
+    BATCH = 50
+    try:
+        async with asyncio.timeout(GLOBAL_TIMEOUT):
+            for i in range(0, total, BATCH):
+                batch = routes[i:i + BATCH]
+                await asyncio.gather(*[probe(r) for r in batch])
+                pct = min(i + BATCH, total)
+                print(f"  {_c(_C_DIM, f'[next/data] {pct}/{total}')}", end="\r")
+            print()
+    except asyncio.TimeoutError:
+        print(f"{_pfx()}{_c(_C_YELLOW, f'[next/data] timeout after {GLOBAL_TIMEOUT}s ({hits} hit(s) so far)')}")
+
+    if hits:
+        _ok(f"Next.js data: {_c(_C_GREEN, str(hits))} endpoint(s) with data → {_c(_C_DIM, str(data_dir))}")
+    else:
+        print(f"{_pfx()}{_c(_C_DIM, '[-] No /_next/data endpoints returned data')}")
+
+
+def grep_build_id_from_files(domain_dir: Path) -> str | None:
+    """Grep downloaded JS files for buildId:"..." pattern."""
+    js_dir = domain_dir / "js"
+    if not js_dir.exists():
+        return None
+    pattern = re.compile(r"""["']buildId["']\s*:\s*["']([a-zA-Z0-9_-]{8,})["']""")
+    for js_file in js_dir.rglob("*.js"):
+        try:
+            text = js_file.read_text(encoding="utf-8", errors="replace")
+            m = pattern.search(text)
+            if m:
+                return m.group(1)
+        except Exception:
+            continue
+    return None
+
+
+async def process_nextjs(base_url: str, js_urls: list[str],
+                          domain_dir: Path, client: httpx.AsyncClient,
+                          hint_build_id: str | None = None,
+                          wordlist: list[str] | None = None):
+    """Full Next.js pipeline: buildId → routes → data probing.
+    buildId is resolved from 3 sources in priority order:
+      1. __NEXT_DATA__ from page HTML (most reliable)
+      2. _buildManifest.js URL pattern
+      3. grep in downloaded JS content
+    """
+    # Source 1: from __NEXT_DATA__ via Playwright
+    build_id = hint_build_id
+
+    # Source 2: from _buildManifest.js URL
+    if not build_id:
+        build_id = extract_build_id(js_urls)
+
+    # Source 3: grep JS files on disk for buildId:"..."
+    if not build_id:
+        build_id = grep_build_id_from_files(domain_dir)
+
+    if not build_id:
+        return
+
+    source = "page" if hint_build_id else ("url" if extract_build_id(js_urls) else "grep")
+
+    print(f"{_pfx()}{_c(_C_CYAN + _C_BOLD, '[next]')} buildId: {_c(_C_YELLOW, build_id)} {_c(_C_DIM, f'(via {source})')}")
+
+    manifest = await fetch_build_manifest(base_url, build_id, client)
+
+    if manifest:
+        routes = extract_routes(manifest)
+        routes_file = domain_dir / "routes.txt"
+        routes_file.write_text("\n".join(routes) + "\n", encoding="utf-8")
+        _ok(f"Routes: {_c(_C_GREEN, str(len(routes)))} found → {_c(_C_DIM, str(routes_file))}")
+        if routes:
+            for r in routes[:5]:
+                print(f"  {_c(_C_DIM, '  ' + r)}")
+            if len(routes) > 5:
+                print(f"  {_c(_C_DIM, f'  ... and {len(routes)-5} more')}")
+        manifest_source = "buildManifest"
+    else:
+        wl = wordlist if wordlist else NEXT_DATA_WORDLIST
+        print(f"{_pfx()}{_c(_C_DIM, f'[-] _buildManifest unavailable — bruting {len(wl)} name(s) from wordlist')}")
+        routes = []
+        for name in wl:
+            routes.append("/" + name)
+        for a in wl[:20]:
+            for b in wl[:20]:
+                if a != b:
+                    routes.append(f"/{a}/{b}")
+        manifest_source = "wordlist_brute"
+
+    # Save next_info.json
+    next_info = {
+        "build_id":     build_id,
+        "source":       source,
+        "manifest":     manifest_source,
+        "base_url":     base_url,
+        "data_base":    f"{base_url}/_next/data/{build_id}/",
+        "manifest_url": f"{base_url}/_next/static/{build_id}/_buildManifest.js",
+        "routes":       routes if manifest else [],
+    }
+    info_file = domain_dir / "next_info.json"
+    info_file.write_text(json.dumps(next_info, indent=2, ensure_ascii=False), encoding="utf-8")
+    _ok(f"Next.js info saved → {_c(_C_DIM, str(info_file))}")
+
+    await probe_next_data(base_url, build_id, routes, domain_dir, client)
 
 
 # ─── Entry point ─────────────────────────────────────────────────────────────
@@ -532,6 +923,12 @@ async def main():
     parser.add_argument("-d", "--download", action="store_true", help="Download all collected JS files")
     parser.add_argument("-H", "--header", action="append", default=None, metavar="'Name: value'",
                         help="Custom HTTP header (repeatable, e.g. -H 'Cookie: x=y' -H 'Authorization: Bearer x')")
+    parser.add_argument("--proxy", default=None,
+                        help="Proxy URL for brute requests (e.g. socks5://127.0.0.1:9050)")
+    parser.add_argument("--brute-concurrency", type=int, default=20,
+                        help="Parallel brute requests per directory (default: 20, use 3-5 for Tor)")
+    parser.add_argument("--brute-delay", type=float, default=0.0,
+                        help="Delay in seconds between brute requests (default: 0, use 1-2 for Tor)")
     args = parser.parse_args()
 
     # Load target(s)
@@ -560,13 +957,27 @@ async def main():
     headers = parse_headers(args.header)
 
     sem = asyncio.Semaphore(args.concurrency)
+    # ProcessPoolExecutor for Playwright — each browser in isolated process
+    # Prevents event loop blocking when a browser hangs
+    pw_executor = ProcessPoolExecutor(max_workers=args.concurrency)
     tasks = [
-        process_subdomain(sub, output_dir, wordlist, args.timeout, sem, args.verbose, args.download, custom_headers=headers)
+        process_subdomain(
+            sub, output_dir, wordlist, args.timeout, sem,
+            args.verbose, args.download,
+            custom_headers=headers,
+            proxy=args.proxy,
+            brute_concurrency=args.brute_concurrency,
+            brute_delay=args.brute_delay,
+            pw_executor=pw_executor,
+        )
         for sub in subdomains
     ]
 
     print(f"[*] Starting recon on {len(subdomains)} subdomain(s)\n")
-    await asyncio.gather(*tasks)
+    try:
+        await asyncio.gather(*tasks)
+    finally:
+        pw_executor.shutdown(wait=False, cancel_futures=True)
 
     # Cleanup empty domain directories
     cleaned = cleanup_empty_domains(output_dir)
@@ -579,4 +990,10 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        import os
+        os._exit(0)

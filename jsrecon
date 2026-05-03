@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# jsrecon — wrapper for ai-js_recon toolkit
+# Install: sudo cp jsrecon /usr/local/bin/jsrecon && sudo chmod +x /usr/local/bin/jsrecon
+
+set -euo pipefail
+
+TOOLS_DIR="/opt/my-tools/ai-js_recon"
+RECON_SCRIPT="$TOOLS_DIR/ai-jsrecon.py"
+GREP_SCRIPT="$TOOLS_DIR/grepper.py"
+VENV_PYTHON="$TOOLS_DIR/venv/bin/python3"
+if [[ -f "$VENV_PYTHON" ]]; then
+    PYTHON="${PYTHON:-$VENV_PYTHON}"
+else
+    PYTHON="${PYTHON:-python3}"
+fi
+
+# ── Colors ────────────────────────────────────────────────
+RED='\033[91m'; YELLOW='\033[93m'; CYAN='\033[96m'
+BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
+
+info()  { echo -e "${CYAN}[*]${RESET} $*"; }
+ok()    { echo -e "${BOLD}[✓]${RESET} $*"; }
+warn()  { echo -e "${YELLOW}[!]${RESET} $*"; }
+die()   { echo -e "${RED}[!]${RESET} $*" >&2; exit 1; }
+sep()   { echo -e "${DIM}$(printf '─%.0s' {1..60})${RESET}"; }
+
+# ── Usage ─────────────────────────────────────────────────
+usage() {
+    echo -e "${BOLD}jsrecon${RESET} — JS recon + analysis toolkit\n"
+    echo -e "${BOLD}USAGE${RESET}"
+    echo    "  jsrecon scan <targets.txt> [options]"
+    echo    "  jsrecon grep [options]"
+    echo    "  jsrecon full <targets.txt> [options]"
+    echo
+    echo -e "${BOLD}COMMANDS${RESET}"
+    echo    "  scan    Run ai-jsrecon.py (collect + brute JS files)"
+    echo    "  grep    Run grepper.py  (analyze downloaded JS)"
+    echo    "  full    Run scan then grep"
+    echo
+    echo -e "${BOLD}SCAN OPTIONS${RESET}"
+    echo    "  -d, --download          Download all found JS files"
+    echo    "  -w, --wordlist <file>   Custom JS wordlist"
+    echo    "  -t, --timeout <sec>     Page load timeout (default: 20)"
+    echo    "  -c, --concurrency <n>   Parallel subdomains (default: 3)"
+    echo    "  -o, --output <dir>      Output dir (default: ./output)"
+    echo    "  -v, --verbose           Verbose output"
+    echo    "      --no-beautify       Skip jsbeautifier"
+    echo    "      --proxy <url>        Proxy for brute (e.g. socks5://127.0.0.1:9050)"
+    echo    "      --brute-concurrency  Parallel brute requests (default: 20, Tor: 3-5)"
+    echo    "      --brute-delay        Delay between brute requests in sec (default: 0)"
+    echo
+    echo -e "${BOLD}GREP OPTIONS${RESET}"
+    echo    "  -j, --jobs <n>          Parallel workers (default: 4)"
+    echo    "      --json              Save JSON report"
+    echo    "      --save-txt          Save plain text report"
+    echo    "      --severity <lvl>    secrets|all (default: all)"
+    echo    "      --domain <name>     Filter by domain"
+    echo    "      --no-color          Disable colors"
+    echo    "      --target <path>     Scan arbitrary path instead of -o dir (repeatable)"
+    echo    "                          e.g. jsrecon grep --target ~/.config/waymore/results/target.com/jsfiles/"
+    echo
+    echo -e "${BOLD}EXAMPLES${RESET}"
+    echo    "  jsrecon scan targets.txt --download"
+    echo    "  jsrecon grep --severity secrets --json"
+    echo    "  jsrecon full targets.txt --download --json --save-txt"
+    echo    "  jsrecon full targets.txt -d -v --severity secrets"
+}
+
+# ── Argument parser ───────────────────────────────────────
+CMD=""
+TARGETS=""
+OUTPUT="./output"
+
+# Scan args
+SCAN_ARGS=()
+# Grep args
+GREP_ARGS=()
+# Shared
+DOWNLOAD=0
+VERBOSE=0
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            scan|grep|full)
+                CMD="$1"; shift
+                # Next positional = targets file (for scan/full)
+                if [[ "${CMD}" != "grep" && $# -gt 0 && "${1:0:1}" != "-" ]]; then
+                    TARGETS="$1"; shift
+                fi
+                ;;
+            -o|--output)
+                OUTPUT="$2"
+                SCAN_ARGS+=("-o" "$2")
+                GREP_ARGS+=("-o" "$2")
+                shift 2
+                ;;
+            -d|--download)
+                DOWNLOAD=1
+                SCAN_ARGS+=("--download")
+                shift
+                ;;
+            -v|--verbose)
+                VERBOSE=1
+                SCAN_ARGS+=("--verbose")
+                shift
+                ;;
+            -w|--wordlist)
+                SCAN_ARGS+=("-w" "$2"); shift 2 ;;
+            -t|--timeout)
+                SCAN_ARGS+=("-t" "$2"); shift 2 ;;
+            -c|--concurrency)
+                SCAN_ARGS+=("-c" "$2"); shift 2 ;;
+            --no-beautify)
+                SCAN_ARGS+=("--no-beautify"); shift ;;
+            --proxy)
+                SCAN_ARGS+=("--proxy" "$2"); shift 2 ;;
+            --brute-concurrency)
+                SCAN_ARGS+=("--brute-concurrency" "$2"); shift 2 ;;
+            --brute-delay)
+                SCAN_ARGS+=("--brute-delay" "$2"); shift 2 ;;
+            -j|--jobs)
+                GREP_ARGS+=("-j" "$2"); shift 2 ;;
+            --json)
+                GREP_ARGS+=("--json"); shift ;;
+            --save-txt)
+                GREP_ARGS+=("--save-txt"); shift ;;
+            --severity)
+                GREP_ARGS+=("--severity" "$2"); shift 2 ;;
+            --domain)
+                GREP_ARGS+=("--domain" "$2"); shift 2 ;;
+            --no-color)
+                SCAN_ARGS+=("--no-color")
+                GREP_ARGS+=("--no-color")
+                shift
+                ;;
+            --target|-T)
+                GREP_ARGS+=("-t" "$2"); shift 2 ;;
+            -h|--help|help)
+                usage; exit 0 ;;
+            *)
+                # Unknown arg — pass to both
+                SCAN_ARGS+=("$1")
+                GREP_ARGS+=("$1")
+                shift
+                ;;
+        esac
+    done
+}
+
+# ── Commands ──────────────────────────────────────────────
+run_scan() {
+    [[ -n "$TARGETS" ]] || die "targets file required for scan. Usage: jsrecon scan <targets.txt>"
+    [[ -f "$TARGETS" ]] || die "targets file not found: $TARGETS"
+
+    local count
+    count=$(grep -c . "$TARGETS" 2>/dev/null || echo "?")
+
+    sep
+    info "ai-jsrecon.py — ${BOLD}$count${RESET} target(s) from ${BOLD}$TARGETS${RESET}"
+    info "Output: ${BOLD}$(realpath -m "$OUTPUT")${RESET}"
+    [[ $DOWNLOAD -eq 1 ]] && info "Download: ${BOLD}enabled${RESET}"
+    sep
+
+    "$PYTHON" "$RECON_SCRIPT" -f "$TARGETS" "${SCAN_ARGS[@]}"
+}
+
+run_grep() {
+    sep
+    info "grepper.py — analyzing JS in ${BOLD}$(realpath -m "$OUTPUT")${RESET}"
+    sep
+
+    "$PYTHON" "$GREP_SCRIPT" "${GREP_ARGS[@]}"
+}
+
+# ── Entry ─────────────────────────────────────────────────
+[[ $# -eq 0 ]] && { usage; exit 0; }
+
+parse_args "$@"
+
+# ── Sanity checks (after help is handled) ─────────────────
+if [[ "$CMD" != "" ]]; then
+    [[ -f "$RECON_SCRIPT" ]] || die "ai-jsrecon.py not found at $RECON_SCRIPT"
+    [[ -f "$GREP_SCRIPT"  ]] || die "grepper.py not found at $GREP_SCRIPT"
+    command -v "$PYTHON" &>/dev/null || die "python3 not found"
+fi
+
+# Default output to grep args if not already set
+[[ " ${GREP_ARGS[*]} " != *" -o "* ]] && GREP_ARGS+=("-o" "$OUTPUT")
+
+START=$(date +%s)
+
+case "$CMD" in
+    scan)
+        run_scan
+        ;;
+    grep)
+        run_grep
+        ;;
+    full)
+        run_scan
+        echo
+        if [[ $DOWNLOAD -eq 0 ]]; then
+            warn "No --download flag — grepper needs JS files. Running anyway."
+        fi
+        run_grep
+        ;;
+    "")
+        die "No command specified. Use: scan, grep, or full"
+        ;;
+    *)
+        die "Unknown command: $CMD"
+        ;;
+esac
+
+END=$(date +%s)
+sep
+ok "Done in $((END - START))s"
