@@ -639,7 +639,19 @@ async def process_subdomain(
 
         # Stage 2 — brute all dirs from target host only (skip CDNs)
         target_host = urlparse(url).netloc
-        target_js = [u for u in js_urls if urlparse(u).netloc == target_host]
+
+        def _root_domain(host: str) -> str:
+            """Extract root domain (TLD+1): api.odrex.ua → odrex.ua"""
+            # Strip port if present
+            host = host.split(":")[0]
+            parts = host.split(".")
+            # Handle common multi-part TLDs: co.uk, com.ua, org.ua etc.
+            if len(parts) >= 3 and len(parts[-2]) <= 3:
+                return ".".join(parts[-3:])
+            return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+        target_root = _root_domain(target_host)
+        target_js = [u for u in js_urls if _root_domain(urlparse(u).netloc) == target_root]
         base_dirs = list({base_dir_of(u) for u in target_js})
 
         bruted: list[str] = []
