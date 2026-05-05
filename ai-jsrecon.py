@@ -207,6 +207,20 @@ def _playwright_worker(url: str, timeout: int, custom_headers: dict | None) -> t
             except Exception:
                 pass
 
+            # Parse HTML for <script src="..."> tags — catches JS not executed on load
+            try:
+                html_scripts = page.evaluate("""
+                    () => Array.from(document.querySelectorAll('script[src]'))
+                               .map(s => s.src)
+                               .filter(s => s && !s.startsWith('blob:'))
+                """)
+                if html_scripts:
+                    for s in html_scripts:
+                        if s not in js_urls:
+                            js_urls.append(s)
+            except Exception:
+                pass
+
             browser.close()
     except Exception:
         pass
