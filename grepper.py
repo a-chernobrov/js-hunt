@@ -269,6 +269,33 @@ def merge_results(results: list, output_root: Path) -> dict:
     return summary
 
 
+def collect_vite_info(output: Path) -> dict:
+    """Collect vite_info.json from all domain directories."""
+    vite_findings = {}
+    for domain_dir in sorted(output.iterdir()):
+        if not domain_dir.is_dir():
+            continue
+        vite_info_file = domain_dir / "vite_info.json"
+        if not vite_info_file.exists():
+            continue
+        try:
+            data = json.loads(vite_info_file.read_text(encoding="utf-8"))
+            # Attach LFI file contents if any
+            lfi_dir = domain_dir / "vite_lfi"
+            lfi_contents = {}
+            if lfi_dir.exists():
+                for f in sorted(lfi_dir.iterdir()):
+                    try:
+                        lfi_contents[f.name] = f.read_text(encoding="utf-8", errors="replace")
+                    except Exception:
+                        pass
+            data["lfi_contents"] = lfi_contents
+            vite_findings[domain_dir.name] = data
+        except Exception:
+            continue
+    return vite_findings
+
+
 # ─── Report ──────────────────────────────────────────────────────────────────
 
 def _section(title: str):
@@ -318,7 +345,7 @@ def print_report(summary: dict, severity: str):
 
     if severity == "secrets":
         print(f"\n{col(C.BOLD, '#'*70)}\n")
-        return
+
 
     _section("API ENDPOINTS")
     if summary["all_apis"]:
@@ -352,6 +379,37 @@ def print_report(summary: dict, severity: str):
                 print(f"    {col(color, cat_key.capitalize())}: {', '.join(parts)}")
 
     print(f"\n{col(C.BOLD, '#'*70)}\n")
+
+def print_vite_summary(vite_data: dict):
+    """Print Vite findings summary."""
+    if not vite_data:
+        return
+    detected = [d for d, v in vite_data.items() if v.get("confirmed")]
+    if not detected:
+        return
+
+    print(f"\n{col(C.BOLD, '='*70)}")
+    print(f"  {col(C.BOLD, 'VITE CVE FINDINGS')}")
+    print(col(C.BOLD, '='*70))
+
+    for domain, info in vite_data.items():
+        confirmed = info.get("confirmed", [])
+        lfi_files = info.get("lfi_files", [])
+        if not confirmed:
+            continue
+        print(f"\n  {col(C.BOLD, domain)}")
+        print(f"    Root: {col(C.YELLOW, info.get('root_path', '/'))}")
+        for cve in confirmed:
+            print(f"    {col(C.RED + C.BOLD, '[CVE]')} {col(C.RED, cve)}")
+        if lfi_files:
+            print(f"    {col(C.RED, f'LFI files read: {len(lfi_files)}')}")
+            for f in lfi_files[:5]:
+                print(f"      {col(C.DIM, f)}")
+            if len(lfi_files) > 5:
+                print(f"      {col(C.DIM, f'... and {len(lfi_files)-5} more')}")
+
+    print(f"\n{col(C.BOLD, '#'*70)}\n")
+
 
 
 def save_txt_report(summary: dict, output: Path):
@@ -477,10 +535,19 @@ def main():
     summary = merge_results(results, output)
     print_report(summary, args.severity)
 
+    # Vite CVE summary
+    if not args.target:
+        vite_data = collect_vite_info(output)
+        print_vite_summary(vite_data)
+
     if args.save_txt:
         save_txt_report(summary, output)
 
     if args.json:
+        vite_data = {}
+        if not args.target:
+            vite_data = collect_vite_info(output)
+
         out = output / "js_analysis_report.json"
         out.write_text(json.dumps({
             "scan_time":     summary["scan_time"],
@@ -491,6 +558,7 @@ def main():
             "secrets":       dict(summary["all_secrets"]),
             "apis":          dict(summary["all_apis"]),
             "sensitive":     dict(summary["all_sensitive"]),
+            "vite":          vite_data,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"[*] JSON report saved: {out}")
 

