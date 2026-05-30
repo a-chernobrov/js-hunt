@@ -82,6 +82,10 @@ SECRET_PATTERNS = {
     "Internal IPv4":           r"(?:https?://)?(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|localhost(?::\d{2,5})?)(?:/[^\s'\"]{2,}|:\d{2,5})",
     "S3 Bucket URL":           r"[a-z0-9][a-z0-9\-]{2,62}\.s3(?:[\.\-][a-z0-9\-]+)?\.amazonaws\.com",
     "SMTP Credentials":        r"(?i)smtp[^\n]{0,60}(?:user|pass|login|password)\s*[:=]\s*['\"][^'\"]{4,}['\"]",
+    "Vite /@fs/ LFI":          r"/@fs/[/a-zA-Z0-9_.\-]{4,}",
+    "Vite Env Variable":       r"VITE_[A-Z0-9_]{3,}\s*[:=]\s*['\"][^'\"]{4,}['\"]",
+    "import.meta.env":         r"import\.meta\.env\.VITE_[A-Z0-9_]{3,}",
+    
 }
 
 API_PATTERNS = {
@@ -94,6 +98,9 @@ API_PATTERNS = {
     "External API Call":       r"(?:axios|fetch)\s*\(\s*['\"]https?://[a-zA-Z0-9.\-]+/[^'\"]{4,}['\"]",
     "GraphQL Query/Mutation":  r"(?:query|mutation)\s+\w+\s*[({]",
     "WebSocket URL":           r"wss?://[a-zA-Z0-9.\-]+/[^\s'\"]{3,}",
+    "Template Literal API":    r"`\$\{[^}]+\}/([a-z][a-z0-9_/\-?=&.]{2,})",
+    "Fetch/Axios Template":    r"(?:fetch|axios)\s*\(\s*`[^`]{0,60}\$\{[^}]+\}/([a-z][a-z0-9_/\-?=&.]{2,})",
+    
 }
 
 SENSITIVE_PATTERNS = {
@@ -115,6 +122,8 @@ SENSITIVE_PATTERNS = {
     "Proxy/Tunnel":      r"['\"]/(?:proxy|vpn|tunnel|forward)[/'\"?]",
     "Kubernetes/API":    r"['\"]/(?:api/v1|apis/apps|kube|k8s)[/'\"?]",
     "Bitrix":            r"['\"]/(?:bitrix|rest/\d+/[a-z]+)[/'\"?]",
+    "Vite Dev Paths":    r"['\"/](?:@vite|@fs|@id|__vite_ping)[/'\"?]?",
+    "Vite Proxy Config": r"(?i)proxy\s*:\s*\{[^}]{0,200}target\s*:\s*['\"][^'\"]{8,}['\"]",
 }
 
 
@@ -132,11 +141,17 @@ def _scan_patterns(lines: list, patterns: dict, flags=0, max_val=120) -> dict:
     results = defaultdict(list)
     seen = defaultdict(set)
 
+    # URL patterns that indicate false positives
+    _FP_URL_RE = re.compile(r"/jsd/|cdn-cgi|challenge-platform|\.cloudflare\.")
+
     for lineno, line in enumerate(lines, 1):
         for name, pat in patterns.items():
             for m in re.finditer(pat, line, flags):
                 val = m.group()[:max_val].strip()
                 if len(val) < 8 or val in seen[name]:
+                    continue
+                # Skip values found inside known CDN/challenge URLs
+                if _FP_URL_RE.search(line):
                     continue
                 seen[name].add(val)
                 note = None
@@ -165,9 +180,24 @@ def _maybe_beautify(text: str) -> list:
 
 _SOURCE_EXTS = {".ts", ".tsx", ".jsx", ".mjs", ".cjs", ".vue", ".svelte"}
 
+# Files to skip entirely — known false positive sources
+_FP_SKIP_FILES = re.compile(
+    r"cdn-cgi[_/]challenge|challenge-platform[_/].*jsd|"
+    r"_cf_chl|cloudflare-static",
+    re.IGNORECASE
+)
+
 def scan_file(args: tuple) -> dict:
     filepath, domain_label, do_beautify = args
     filepath = Path(filepath)
+
+    # Skip known Cloudflare challenge/CDN files — they generate false positives
+    if _FP_SKIP_FILES.search(filepath.name):
+        return {
+            "file": str(filepath), "domain": domain_label,
+            "size": 0, "beautified": False, "error": "skipped:fp",
+            "secrets": {}, "apis": {}, "sensitive": {},
+        }
 
     result = {
         "file":      str(filepath),

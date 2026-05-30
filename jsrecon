@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-TOOLS_DIR="/opt/my-tools/ai-js_recon"
+TOOLS_DIR="/opt/my-tools/auto-recon/ai-js_recon"
 RECON_SCRIPT="$TOOLS_DIR/ai-jsrecon.py"
 GREP_SCRIPT="$TOOLS_DIR/grepper.py"
 VENV_PYTHON="$TOOLS_DIR/venv/bin/python3"
@@ -28,9 +28,9 @@ sep()   { echo -e "${DIM}$(printf '─%.0s' {1..60})${RESET}"; }
 usage() {
     echo -e "${BOLD}jsrecon${RESET} — JS recon + analysis toolkit\n"
     echo -e "${BOLD}USAGE${RESET}"
-    echo    "  jsrecon scan <targets.txt> [options]"
+    echo    "  jsrecon scan <targets.txt|url> [options]"
     echo    "  jsrecon grep [options]"
-    echo    "  jsrecon full <targets.txt> [options]"
+    echo    "  jsrecon full <targets.txt|url> [options]"
     echo
     echo -e "${BOLD}COMMANDS${RESET}"
     echo    "  scan    Run ai-jsrecon.py (collect + brute JS files)"
@@ -45,6 +45,8 @@ usage() {
     echo    "  -o, --output <dir>      Output dir (default: ./output)"
     echo    "  -v, --verbose           Verbose output"
     echo    "      --no-beautify       Skip jsbeautifier"
+    echo    "      --crawl <mode>      Crawl mode: none|medium|deep (default: none)"
+    echo    "      --crawl-depth <n>   Max pages in deep mode (default: 10)"
     echo    "      --proxy <url>        Proxy for brute (e.g. socks5://127.0.0.1:9050)"
     echo    "      --brute-concurrency  Parallel brute requests (default: 20, Tor: 3-5)"
     echo    "      --brute-delay        Delay between brute requests in sec (default: 0)"
@@ -61,6 +63,7 @@ usage() {
     echo
     echo -e "${BOLD}EXAMPLES${RESET}"
     echo    "  jsrecon scan targets.txt --download"
+    echo    "  jsrecon full https://example.com --download --json"
     echo    "  jsrecon grep --severity secrets --json"
     echo    "  jsrecon full targets.txt --download --json --save-txt"
     echo    "  jsrecon full targets.txt -d -v --severity secrets"
@@ -69,6 +72,7 @@ usage() {
 # ── Argument parser ───────────────────────────────────────
 CMD=""
 TARGETS=""
+SINGLE_URL=""
 OUTPUT="./output"
 
 # Scan args
@@ -81,12 +85,24 @@ VERBOSE=0
 
 parse_args() {
     while [[ $# -gt 0 ]]; do
+        if [[ -n "$CMD" && "$CMD" != "grep" && -z "$TARGETS" && -z "$SINGLE_URL" && "${1:0:1}" != "-" ]]; then
+            if [[ -f "$1" ]]; then
+                TARGETS="$1"; shift
+            else
+                SINGLE_URL="$1"; shift
+            fi
+            continue
+        fi
         case "$1" in
             scan|grep|full)
                 CMD="$1"; shift
                 # Next positional = targets file (for scan/full)
                 if [[ "${CMD}" != "grep" && $# -gt 0 && "${1:0:1}" != "-" ]]; then
-                    TARGETS="$1"; shift
+                    if [[ -f "$1" ]]; then
+                        TARGETS="$1"; shift
+                    else
+                        SINGLE_URL="$1"; shift
+                    fi
                 fi
                 ;;
             -o|--output)
@@ -113,6 +129,10 @@ parse_args() {
                 SCAN_ARGS+=("-c" "$2"); shift 2 ;;
             --no-beautify)
                 SCAN_ARGS+=("--no-beautify"); shift ;;
+            --crawl)
+                SCAN_ARGS+=("--crawl" "$2"); shift 2 ;;
+            --crawl-depth)
+                SCAN_ARGS+=("--crawl-depth" "$2"); shift 2 ;;
             --proxy)
                 SCAN_ARGS+=("--proxy" "$2"); shift 2 ;;
             --brute-concurrency)
@@ -150,19 +170,24 @@ parse_args() {
 
 # ── Commands ──────────────────────────────────────────────
 run_scan() {
-    [[ -n "$TARGETS" ]] || die "targets file required for scan. Usage: jsrecon scan <targets.txt>"
-    [[ -f "$TARGETS" ]] || die "targets file not found: $TARGETS"
-
-    local count
-    count=$(grep -c . "$TARGETS" 2>/dev/null || echo "?")
-
     sep
-    info "ai-jsrecon.py — ${BOLD}$count${RESET} target(s) from ${BOLD}$TARGETS${RESET}"
+    if [[ -n "$SINGLE_URL" ]]; then
+        info "ai-jsrecon.py — single target ${BOLD}$SINGLE_URL${RESET}"
+    else
+        [[ -n "$TARGETS" ]] || die "targets file or url required for scan. Usage: jsrecon scan <targets.txt|url>"
+        [[ -f "$TARGETS" ]] || die "targets file not found: $TARGETS"
+        local count
+        count=$(grep -c . "$TARGETS" 2>/dev/null || echo "?")
+        info "ai-jsrecon.py — ${BOLD}$count${RESET} target(s) from ${BOLD}$TARGETS${RESET}"
+    fi
     info "Output: ${BOLD}$(realpath -m "$OUTPUT")${RESET}"
     [[ $DOWNLOAD -eq 1 ]] && info "Download: ${BOLD}enabled${RESET}"
     sep
-
-    "$PYTHON" "$RECON_SCRIPT" -f "$TARGETS" "${SCAN_ARGS[@]}"
+    if [[ -n "$SINGLE_URL" ]]; then
+        "$PYTHON" "$RECON_SCRIPT" -u "$SINGLE_URL" "${SCAN_ARGS[@]}"
+    else
+        "$PYTHON" "$RECON_SCRIPT" -f "$TARGETS" "${SCAN_ARGS[@]}"
+    fi
 }
 
 run_grep() {
@@ -187,6 +212,8 @@ fi
 
 # Default output to grep args if not already set
 [[ " ${GREP_ARGS[*]} " != *" -o "* ]] && GREP_ARGS+=("-o" "$OUTPUT")
+# Default output to scan args if not already set
+[[ " ${SCAN_ARGS[*]} " != *" -o "* ]] && SCAN_ARGS+=("-o" "$OUTPUT")
 
 START=$(date +%s)
 
