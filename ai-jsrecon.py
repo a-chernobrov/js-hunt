@@ -873,6 +873,18 @@ async def process_subdomain(
         print(f"{_pfx()}{_c(_C_DIM, "[>]")} {js_f}")
         print(f"{_pfx()}{_c(_C_DIM, "[>]")} {br_f}")
 
+        # Save Cloudflare marker for manual review
+        if is_cloudflare:
+            cf_marker = output_dir / slug / "CLOUDFLARE.txt"
+            cf_marker.write_text(
+                f"Cloudflare detected on {url}\n"
+                f"JS files collected: {len(target_js)}\n"
+                f"Brute: skipped\n"
+                f"Manual review needed: visit {url} in browser and check JS manually\n",
+                encoding="utf-8"
+            )
+            print(f"{_pfx()}{_c(_C_YELLOW, "[cf]")} Marker saved → {_c(_C_DIM, str(cf_marker))}")
+
         # Download if requested
         if download:
             all_js = list(set(target_js + bruted))
