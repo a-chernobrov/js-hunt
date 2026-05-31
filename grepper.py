@@ -461,9 +461,86 @@ def save_txt_report(summary: dict, output: Path):
                 lines.append(f"         {Path(m['file']).name}")
         lines.append("")
 
+
     out = output / "js_analysis_report.txt"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"[*] TXT report saved: {out}")
+
+
+def save_full_report(output: Path, scan_time: str):
+    """
+    Collect all domain_report.json files and write output/full_report.json.
+    This is the single source of truth — all domains, all data.
+    """
+    full = {
+        "scan_time": scan_time,
+        "domains":   {},
+    }
+
+    for domain_dir in sorted(output.iterdir()):
+        if not domain_dir.is_dir():
+            continue
+        report_path = domain_dir / "domain_report.json"
+        if not report_path.exists():
+            continue
+        try:
+            full["domains"][domain_dir.name] = json.loads(
+                report_path.read_text(encoding="utf-8")
+            )
+        except Exception as e:
+            print(f"[!] Could not read {report_path}: {e}")
+
+    full["total_domains"] = len(full["domains"])
+
+    out = output / "full_report.json"
+    out.write_text(json.dumps(full, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"[*] Full report saved: {out} ({full['total_domains']} domain(s))")
+
+
+def save_per_domain_reports(summary: dict, output: Path):
+    """
+    Write output/<domain>/grepper_report.json for each domain.
+    Merges into domain_report.json if it already exists (written by ai-jsrecon.py).
+    """
+    for domain, data in summary["domains"].items():
+        domain_dir = output / domain
+        if not domain_dir.is_dir():
+            continue
+
+        grepper_section = {
+            "files_scanned": data["files"],
+            "size_mb":       round(data["size_mb"], 3),
+            "secrets":       {k: v for k, v in data["secrets"].items()   if v},
+            "apis":          {k: v for k, v in data["apis"].items()      if v},
+            "sensitive":     {k: v for k, v in data["sensitive"].items() if v},
+        }
+
+        # Write standalone grepper_report.json
+        grepper_path = domain_dir / "grepper_report.json"
+        grepper_path.write_text(
+            json.dumps(grepper_section, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+
+        # Merge into domain_report.json if it exists
+        domain_report_path = domain_dir / "domain_report.json"
+        if domain_report_path.exists():
+            try:
+                report = json.loads(domain_report_path.read_text(encoding="utf-8"))
+                report["grepper"] = grepper_section
+                # Update summary counters
+                if "summary" in report:
+                    report["summary"]["secrets_count"]  = sum(len(v) for v in grepper_section["secrets"].values())
+                    report["summary"]["apis_count"]     = sum(len(v) for v in grepper_section["apis"].values())
+                    report["summary"]["sensitive_count"]= sum(len(v) for v in grepper_section["sensitive"].values())
+                domain_report_path.write_text(
+                    json.dumps(report, indent=2, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+            except Exception as e:
+                print(f"[!] Could not merge into domain_report.json for {domain}: {e}")
+
+    print(f"[*] Per-domain grepper reports saved.")
 
 
 # ─── Main ────────────────────────────────────────────────────────────────────
@@ -565,6 +642,10 @@ def main():
     summary = merge_results(results, output)
     print_report(summary, args.severity)
 
+    # Always write per-domain grepper_report.json (and merge into domain_report.json)
+    if not args.target:
+        save_per_domain_reports(summary, output)
+
     # Vite CVE summary
     if not args.target:
         vite_data = collect_vite_info(output)
@@ -591,6 +672,10 @@ def main():
             "vite":          vite_data,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"[*] JSON report saved: {out}")
+
+    # Always write full_report.json — all domains in one file
+    if not args.target:
+        save_full_report(output, summary["scan_time"])
 
 
 if __name__ == "__main__":

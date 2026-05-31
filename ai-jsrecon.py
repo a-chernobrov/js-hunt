@@ -196,11 +196,11 @@ def _playwright_worker(
 
             page.on("request", on_request)
 
-            def _goto(target: str) -> bool:
+            def _goto(target: str, t: int | None = None) -> bool:
                 try:
                     resp = page.goto(
                         target,
-                        timeout=timeout * 1000,
+                        timeout=(t or timeout) * 1000,
                         wait_until="domcontentloaded",
                     )
                     page.wait_for_timeout(1000)
@@ -208,9 +208,12 @@ def _playwright_worker(
                 except Exception:
                     return False
 
-            ok = _goto(url)
+            # For https:// targets use a short probe first (8s) so a hanging
+            # TLS handshake doesn't consume the full timeout before http fallback
+            https_probe_timeout = min(timeout, 8)
+            ok = _goto(url, t=https_probe_timeout)
             if not ok and url.startswith("https://"):
-                _goto(url.replace("https://", "http://", 1))
+                ok = _goto(url.replace("https://", "http://", 1))
 
             # Extract buildId from __NEXT_DATA__
             try:
@@ -590,6 +593,98 @@ def save_results(output_dir: Path, slug: str, js_list: list[str], bruted: list[s
     return js_file, brute_file
 
 
+def save_domain_report(
+    domain_dir: Path,
+    base_url: str,
+    js_urls: list[str],
+    bruted: list[str],
+    is_cloudflare: bool,
+):
+    """
+    Build and write a single domain_report.json that aggregates everything:
+      - js_urls_playwright  : JS found by headless browser
+      - js_urls_bruted      : JS found by filename brute
+      - sources             : extracted source files (from sourcemaps)
+      - sourcemaps          : .map files downloaded
+      - vite                : vite_info.json contents if present
+      - nextjs              : next_info.json contents if present
+      - cloudflare          : bool
+    """
+    report: dict = {
+        "domain":              base_url,
+        "cloudflare":          is_cloudflare,
+        "js_urls_playwright":  sorted(set(js_urls)),
+        "js_urls_bruted":      sorted(set(bruted)),
+        "sources":             [],
+        "sourcemaps":          [],
+        "vite":                None,
+        "nextjs":              None,
+    }
+
+    # Collected source files from sourcemap extraction
+    sources_dir = domain_dir / "sources"
+    if sources_dir.exists():
+        report["sources"] = sorted(
+            str(p.relative_to(sources_dir)) for p in sources_dir.rglob("*") if p.is_file()
+        )
+
+    # Downloaded .map files
+    sourcemaps_dir = domain_dir / "sourcemaps"
+    if sourcemaps_dir.exists():
+        report["sourcemaps"] = sorted(
+            str(p.relative_to(sourcemaps_dir)) for p in sourcemaps_dir.rglob("*.map")
+        )
+
+    # Vite info (root path + CVE results + LFI files)
+    vite_json = domain_dir / "vite_info.json"
+    if vite_json.exists():
+        try:
+            report["vite"] = json.loads(vite_json.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    # Next.js info
+    next_json = domain_dir / "next_info.json"
+    if next_json.exists():
+        try:
+            report["nextjs"] = json.loads(next_json.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    # Grepper results (if grepper.py ran before this call)
+    grepper_json = domain_dir / "grepper_report.json"
+    if grepper_json.exists():
+        try:
+            report["grepper"] = json.loads(grepper_json.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    # ── Summary flags — quick overview without parsing nested fields ──────────
+    report["summary"] = {
+        "js_count":        len(report["js_urls_playwright"]) + len(report["js_urls_bruted"]),
+        "js_playwright":   len(report["js_urls_playwright"]),
+        "js_bruted":       len(report["js_urls_bruted"]),
+        "has_sources":     len(report["sources"]) > 0,
+        "sources_count":   len(report["sources"]),
+        "has_sourcemaps":  len(report["sourcemaps"]) > 0,
+        "sourcemaps_count":len(report["sourcemaps"]),
+        "has_vite":        report["vite"] is not None,
+        "vite_cves":       list(report["vite"]["confirmed"].keys()) if report["vite"] and report["vite"].get("confirmed") else [],
+        "vite_lfi_count":  len(report["vite"]["lfi_files"]) if report["vite"] else 0,
+        "has_nextjs":      report["nextjs"] is not None,
+        "nextjs_routes":   len(report["nextjs"]["routes"]) if report["nextjs"] else 0,
+        "cloudflare":      report["cloudflare"],
+        # grepper counts filled in by grepper.py after it runs
+        "secrets_count":   0,
+        "apis_count":      0,
+        "sensitive_count": 0,
+    }
+
+    out = domain_dir / "domain_report.json"
+    out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    return out
+
+
 def is_valid_sourcemap(data: bytes) -> bool:
     """Check if response body looks like a real source map (not a soft-404 HTML page)."""
     try:
@@ -936,6 +1031,16 @@ async def process_subdomain(
                     await process_vite(url, target_js + bruted, output_dir / slug, client)
             except asyncio.TimeoutError:
                 print(f"{_pfx()}{_c(_C_YELLOW, '[vite] timeout — skipping')}")
+
+        # ── Aggregate all results into a single domain_report.json ───────────
+        report_path = save_domain_report(
+            domain_dir    = output_dir / slug,
+            base_url      = url,
+            js_urls       = target_js,
+            bruted        = bruted,
+            is_cloudflare = is_cloudflare,
+        )
+        _ok(f"Report → {_c(_C_DIM, str(report_path))}")
 
 
 
