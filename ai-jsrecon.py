@@ -174,6 +174,11 @@ def _playwright_worker(
                 ignore_https_errors=True,
                 extra_http_headers=pw_headers,
             )
+            try:
+                ctx.set_default_navigation_timeout(timeout * 1000)
+                ctx.set_default_timeout(1500 if crawl_mode in ("medium", "deep") else 5000)
+            except Exception:
+                pass
             page = ctx.new_page()
 
             def on_request(req):
@@ -250,6 +255,8 @@ def _playwright_worker(
 
             def _crawl_medium():
                 try:
+                    import time as _time
+                    deadline = _time.monotonic() + 12.0
                     try:
                         page.evaluate("""
                             () => new Promise(resolve => {
@@ -263,7 +270,7 @@ def _playwright_worker(
                                 };
                                 step();
                             })
-                        """, timeout=5000)
+                        """)
                     except Exception:
                         pass
                     page.wait_for_timeout(500)
@@ -271,21 +278,27 @@ def _playwright_worker(
                     for sel in ["[role=tab]","[role=menuitem]","nav a",".nav-link",
                                 "button:not([type=submit]):not([disabled])",
                                 "[data-toggle]","[data-bs-toggle]",".accordion-button"]:
+                        if _time.monotonic() > deadline:
+                            break
                         try:
                             for el in page.query_selector_all(sel)[:5]:
+                                if _time.monotonic() > deadline:
+                                    break
                                 try:
-                                    el.scroll_into_view_if_needed()
-                                    el.click(timeout=1000, force=True)
-                                    page.wait_for_timeout(500)
+                                    el.scroll_into_view_if_needed(timeout=800)
+                                    el.click(timeout=800, force=True, no_wait_after=True)
+                                    page.wait_for_timeout(250)
                                     _collect_html_scripts()
                                 except Exception:
                                     pass
                         except Exception:
                             pass
                     for el in (page.query_selector_all("nav li, .dropdown, [data-hover]") or [])[:10]:
+                        if _time.monotonic() > deadline:
+                            break
                         try:
                             el.hover(timeout=500)
-                            page.wait_for_timeout(300)
+                            page.wait_for_timeout(250)
                             _collect_html_scripts()
                         except Exception:
                             pass
@@ -412,7 +425,7 @@ async def collect_js_playwright(
     """
     loop = asyncio.get_running_loop()
     extra = {"none": 10, "medium": 30, "deep": 60}.get(crawl_mode, 10)
-    hard_timeout = timeout + extra
+    hard_timeout = timeout + extra + 5
     try:
         result = await asyncio.wait_for(
             loop.run_in_executor(
@@ -422,7 +435,10 @@ async def collect_js_playwright(
             timeout=hard_timeout,
         )
         return result
-    except (asyncio.TimeoutError, Exception):
+    except asyncio.TimeoutError:
+        _hit(f"Playwright hard-timeout ({hard_timeout}s) — попробуй увеличить -t/--timeout или отключить --crawl")
+        return [], None, {}, False
+    except Exception:
         return [], None, {}, False
 
 
