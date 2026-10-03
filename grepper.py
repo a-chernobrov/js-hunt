@@ -467,6 +467,31 @@ def save_txt_report(summary: dict, output: Path):
     print(f"[*] TXT report saved: {out}")
 
 
+def merge_match_maps(old: dict, new: dict) -> dict:
+    merged = {category: list(matches) for category, matches in (old or {}).items()}
+    for category, matches in (new or {}).items():
+        existing = merged.setdefault(category, [])
+        seen = {json.dumps(item, sort_keys=True, ensure_ascii=False) for item in existing}
+        for item in matches:
+            key = json.dumps(item, sort_keys=True, ensure_ascii=False)
+            if key not in seen:
+                existing.append(item)
+                seen.add(key)
+    return merged
+
+
+def merge_grepper_sections(old: dict, new: dict) -> dict:
+    merged = {
+        "files_scanned": max(old.get("files_scanned", 0), new.get("files_scanned", 0)),
+        "size_mb": max(old.get("size_mb", 0.0), new.get("size_mb", 0.0)),
+        "secrets": merge_match_maps(old.get("secrets", {}), new.get("secrets", {})),
+        "apis": merge_match_maps(old.get("apis", {}), new.get("apis", {})),
+        "sensitive": merge_match_maps(old.get("sensitive", {}), new.get("sensitive", {})),
+    }
+    merged["size_mb"] = round(merged["size_mb"], 3)
+    return merged
+
+
 def save_full_report(output: Path, scan_time: str):
     """
     Collect all domain_report.json files and write output/full_report.json.
@@ -515,24 +540,24 @@ def save_per_domain_reports(summary: dict, output: Path):
             "sensitive":     {k: v for k, v in data["sensitive"].items() if v},
         }
 
-        # Write standalone grepper_report.json
         grepper_path = domain_dir / "grepper_report.json"
-        grepper_path.write_text(
-            json.dumps(grepper_section, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
+        try:
+            old_grepper = json.loads(grepper_path.read_text(encoding="utf-8")) if grepper_path.exists() else {}
+        except Exception:
+            old_grepper = {}
+        merged_grepper = merge_grepper_sections(old_grepper, grepper_section)
+        grepper_path.write_text(json.dumps(merged_grepper, indent=2, ensure_ascii=False), encoding="utf-8")
 
         # Merge into domain_report.json if it exists
         domain_report_path = domain_dir / "domain_report.json"
         if domain_report_path.exists():
             try:
                 report = json.loads(domain_report_path.read_text(encoding="utf-8"))
-                report["grepper"] = grepper_section
-                # Update summary counters
+                report["grepper"] = merge_grepper_sections(report.get("grepper", {}), grepper_section)
                 if "summary" in report:
-                    report["summary"]["secrets_count"]  = sum(len(v) for v in grepper_section["secrets"].values())
-                    report["summary"]["apis_count"]     = sum(len(v) for v in grepper_section["apis"].values())
-                    report["summary"]["sensitive_count"]= sum(len(v) for v in grepper_section["sensitive"].values())
+                    report["summary"]["secrets_count"]  = sum(len(v) for v in report["grepper"]["secrets"].values())
+                    report["summary"]["apis_count"]     = sum(len(v) for v in report["grepper"]["apis"].values())
+                    report["summary"]["sensitive_count"] = sum(len(v) for v in report["grepper"]["sensitive"].values())
                 domain_report_path.write_text(
                     json.dumps(report, indent=2, ensure_ascii=False),
                     encoding="utf-8",

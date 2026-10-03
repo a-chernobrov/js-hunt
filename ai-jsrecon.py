@@ -11,6 +11,8 @@ import sys
 import re
 import json
 import base64
+import threading
+import urllib.request
 import httpx
 from pathlib import Path
 from urllib.parse import urlparse, urljoin
@@ -54,6 +56,34 @@ def _map(method: str, src: str, dst):
 def _src(n: int, dst):
     label = f"{_C_GREEN}{_C_BOLD}[src]{_C_RESET}"
     print(f"{_pfx()}{label} Extracted {_c(_C_GREEN, str(n))} source file(s) → {_c(_C_DIM, str(dst))}")
+
+
+# #region debug-point A:runtime-event
+def _debug_event(hypothesis_id: str, message: str, data: dict | None = None):
+    def send():
+        try:
+            env_path = Path(".dbg/cloud-megafon-headless.env")
+            config = {}
+            if env_path.is_file():
+                config = dict(line.split("=", 1) for line in env_path.read_text().splitlines() if "=" in line)
+            payload = json.dumps({
+                "sessionId": config.get("DEBUG_SESSION_ID", "cloud-megafon-headless"),
+                "runId": "pre-fix",
+                "hypothesisId": hypothesis_id,
+                "location": "ai-jsrecon.py",
+                "msg": f"[DEBUG] {message}",
+                "data": data or {},
+            }).encode()
+            request = urllib.request.Request(
+                config.get("DEBUG_SERVER_URL", "http://127.0.0.1:7777/event"),
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            urllib.request.urlopen(request, timeout=1).read()
+        except Exception:
+            pass
+    threading.Thread(target=send, daemon=True).start()
+# #endregion
 
 
 # ─── Default JS wordlist (filename brute) ────────────────────────────────────
@@ -125,6 +155,32 @@ def domain_slug(url: str) -> str:
     return urlparse(url).netloc.replace(":", "_")
 
 
+def is_domain_processed(output_dir: Path, raw: str) -> bool:
+    url = normalize(raw)
+    if not url:
+        _debug_event("A", "domain rejected during normalization", {"raw": raw})
+        return False
+
+    report_path = output_dir / domain_slug(url) / "domain_report.json"
+    if not report_path.is_file():
+        _debug_event("A", "domain has no report", {"domain": url})
+        return False
+
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        _debug_event("A", "domain report unreadable", {"domain": url})
+        return False
+
+    report_domain = normalize(str(report.get("domain", "")))
+    if not report_domain or domain_slug(report_domain) != domain_slug(url):
+        return False
+
+    processed = report.get("status") == "processed"
+    _debug_event("A", "domain processed check", {"domain": url, "status": report.get("status"), "processed": processed})
+    return processed
+
+
 def is_obvious_js(url: str) -> bool:
     """Return True if the filename (without hash/version) looks like a named bundle."""
     filename = urlparse(url).path.rsplit("/", 1)[-1]
@@ -147,17 +203,20 @@ def _playwright_worker(
     custom_headers: dict | None,
     crawl_mode: str = "none",
     crawl_depth: int = 10,
-) -> tuple[list[str], str | None, dict, bool]:
+) -> tuple[list[str], str | None, dict, bool, bool]:
     """
     Sync Playwright worker — runs in a subprocess.
-    Returns (js_urls, build_id, cookies, is_cloudflare).
+    Returns (js_urls, build_id, cookies, is_cloudflare, page_loaded).
     """
     import asyncio
-    from playwright.sync_api import sync_playwright
+    import traceback
+    import sys
+    from cloakbrowser import launch
     from urllib.parse import urlparse as _urlparse
 
     js_urls: list[str] = []
     page_build_id: str | None = None
+    page_loaded = False
 
     pw_headers = {"Accept-Language": "en-US,en;q=0.9"}
     pw_ua = UA
@@ -166,252 +225,277 @@ def _playwright_worker(
             pw_ua = custom_headers.pop("User-Agent")
         pw_headers.update(custom_headers)
 
+    browser = None
+    ctx = None
+    page = None
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-            ctx = browser.new_context(
-                user_agent=pw_ua,
-                ignore_https_errors=True,
-                extra_http_headers=pw_headers,
-            )
-            try:
-                ctx.set_default_navigation_timeout(timeout * 1000)
-                ctx.set_default_timeout(1500 if crawl_mode in ("medium", "deep") else 5000)
-            except Exception:
-                pass
-            page = ctx.new_page()
+        _debug_event("B", "browser launch started", {"url": url, "timeout": timeout, "headless": True})
+        browser = launch(humanize=True, human_preset="careful", headless=True)
+        ctx = browser.new_context(
+            user_agent=pw_ua,
+            ignore_https_errors=True,
+            extra_http_headers=pw_headers,
+        )
+        try:
+            ctx.set_default_navigation_timeout(timeout * 1000)
+            ctx.set_default_timeout(1500 if crawl_mode in ("medium", "deep") else 5000)
+        except Exception:
+            pass
+        page = ctx.new_page()
 
-            def on_request(req):
-                u = req.url
-                if u.startswith("blob:") or u in js_urls:
-                    return
-                # Catch scripts loaded via any mechanism
-                if req.resource_type == "script":
+        def on_request(req):
+            u = req.url
+            if u.startswith("blob:") or u in js_urls:
+                return
+            # Catch scripts loaded via any mechanism
+            if req.resource_type == "script":
+                js_urls.append(u)
+            elif req.resource_type in ("fetch", "xhr", "other"):
+                # Dynamic imports and fetch-loaded JS
+                path = u.split("?")[0].split("#")[0]
+                if path.endswith(".js") or path.endswith(".mjs") or path.endswith(".cjs"):
                     js_urls.append(u)
-                elif req.resource_type in ("fetch", "xhr", "other"):
-                    # Dynamic imports and fetch-loaded JS
-                    path = u.split("?")[0].split("#")[0]
-                    if path.endswith(".js") or path.endswith(".mjs") or path.endswith(".cjs"):
-                        js_urls.append(u)
 
-            page.on("request", on_request)
+        page.on("request", on_request)
 
-            def _goto(target: str, t: int | None = None) -> bool:
-                try:
-                    resp = page.goto(
-                        target,
-                        timeout=(t or timeout) * 1000,
-                        wait_until="domcontentloaded",
-                    )
-                    page.wait_for_timeout(1000)
-                    return resp is not None and resp.status < 400
-                except Exception:
-                    return False
-
-            # For https:// targets use a short probe first (8s) so a hanging
-            # TLS handshake doesn't consume the full timeout before http fallback
-            https_probe_timeout = min(timeout, 8)
-            ok = _goto(url, t=https_probe_timeout)
-            if not ok and url.startswith("https://"):
-                ok = _goto(url.replace("https://", "http://", 1))
-
-            # Extract buildId from __NEXT_DATA__
+        def _goto(target: str, t: int | None = None) -> bool:
+            started = asyncio.get_event_loop().time()
             try:
-                next_data = page.evaluate("""
-                    () => {
-                        const el = document.getElementById('__NEXT_DATA__');
-                        if (!el) return null;
-                        try { return JSON.parse(el.textContent); } catch(e) { return null; }
-                    }
-                """)
-                if next_data and isinstance(next_data, dict):
-                    page_build_id = next_data.get("buildId")
-            except Exception:
-                pass
+                resp = page.goto(
+                    target,
+                    timeout=(t or timeout) * 1000,
+                    wait_until="domcontentloaded",
+                )
+                page.wait_for_timeout(1000)
+                result = resp is not None and resp.status < 400
+                _debug_event("A", "navigation completed", {"target": target, "status": resp.status if resp else None, "final_url": page.url, "ok": result, "elapsed_ms": round((asyncio.get_event_loop().time() - started) * 1000)})
+                return result
+            except Exception as exc:
+                _debug_event("C", "navigation failed", {"target": target, "error_type": type(exc).__name__, "error": str(exc), "final_url": page.url, "elapsed_ms": round((asyncio.get_event_loop().time() - started) * 1000)})
+                return False
 
-            # Parse HTML for <script src="..."> tags — catches JS not executed on load
+        # For https:// targets use a short probe first (8s) so a hanging
+        # TLS handshake doesn't consume the full timeout before http fallback
+        https_probe_timeout = min(timeout, 8)
+        ok = _goto(url, t=https_probe_timeout)
+        _debug_event("A", "https navigation branch", {"url": url, "probe_timeout": https_probe_timeout, "ok": ok})
+        if not ok and url.startswith("https://"):
+            ok = _goto(url.replace("https://", "http://", 1))
+            _debug_event("A", "http fallback branch", {"url": url.replace("https://", "http://", 1), "ok": ok})
+        page_loaded = ok
+
+        # Extract buildId from __NEXT_DATA__
+        try:
+            next_data = page.evaluate("""
+                () => {
+                    const el = document.getElementById('__NEXT_DATA__');
+                    if (!el) return null;
+                    try { return JSON.parse(el.textContent); } catch(e) { return null; }
+                }
+            """)
+            if next_data and isinstance(next_data, dict):
+                page_build_id = next_data.get("buildId")
+        except Exception:
+            pass
+
+        # Parse HTML for <script src="..."> tags — catches JS not executed on load
+        try:
+            html_scripts = page.evaluate("""
+                () => Array.from(document.querySelectorAll('script[src]'))
+                           .map(s => s.src)
+                           .filter(s => s && !s.startsWith('blob:'))
+            """)
+            if html_scripts:
+                for s in html_scripts:
+                    if s not in js_urls:
+                        js_urls.append(s)
+        except Exception:
+            pass
+
+        def _collect_html_scripts():
             try:
-                html_scripts = page.evaluate("""
+                scripts = page.evaluate("""
                     () => Array.from(document.querySelectorAll('script[src]'))
                                .map(s => s.src)
                                .filter(s => s && !s.startsWith('blob:'))
                 """)
-                if html_scripts:
-                    for s in html_scripts:
-                        if s not in js_urls:
-                            js_urls.append(s)
+                for s in (scripts or []):
+                    if s not in js_urls:
+                        js_urls.append(s)
             except Exception:
                 pass
 
-            def _collect_html_scripts():
+        def _crawl_medium():
+            try:
+                import time as _time
+                deadline = _time.monotonic() + 12.0
                 try:
-                    scripts = page.evaluate("""
-                        () => Array.from(document.querySelectorAll('script[src]'))
-                                   .map(s => s.src)
-                                   .filter(s => s && !s.startsWith('blob:'))
+                    page.evaluate("""
+                        () => new Promise(resolve => {
+                            let total = 0;
+                            const limit = Math.min(document.body.scrollHeight, 5000);
+                            const step = () => {
+                                window.scrollBy(0, 300);
+                                total += 300;
+                                if (total < limit) setTimeout(step, 80);
+                                else resolve();
+                            };
+                            step();
+                        })
                     """)
-                    for s in (scripts or []):
-                        if s not in js_urls:
-                            js_urls.append(s)
                 except Exception:
                     pass
-
-            def _crawl_medium():
-                try:
-                    import time as _time
-                    deadline = _time.monotonic() + 12.0
+                page.wait_for_timeout(500)
+                _collect_html_scripts()
+                for sel in ["[role=tab]","[role=menuitem]","nav a",".nav-link",
+                            "button:not([type=submit]):not([disabled])",
+                            "[data-toggle]","[data-bs-toggle]",".accordion-button"]:
+                    if _time.monotonic() > deadline:
+                        break
                     try:
-                        page.evaluate("""
-                            () => new Promise(resolve => {
-                                let total = 0;
-                                const limit = Math.min(document.body.scrollHeight, 5000);
-                                const step = () => {
-                                    window.scrollBy(0, 300);
-                                    total += 300;
-                                    if (total < limit) setTimeout(step, 80);
-                                    else resolve();
-                                };
-                                step();
-                            })
-                        """)
+                        for el in page.query_selector_all(sel)[:5]:
+                            if _time.monotonic() > deadline:
+                                break
+                            try:
+                                el.scroll_into_view_if_needed(timeout=800)
+                                el.click(timeout=800, force=True, no_wait_after=True)
+                                page.wait_for_timeout(250)
+                                _collect_html_scripts()
+                            except Exception:
+                                pass
                     except Exception:
                         pass
-                    page.wait_for_timeout(500)
-                    _collect_html_scripts()
-                    for sel in ["[role=tab]","[role=menuitem]","nav a",".nav-link",
-                                "button:not([type=submit]):not([disabled])",
-                                "[data-toggle]","[data-bs-toggle]",".accordion-button"]:
-                        if _time.monotonic() > deadline:
-                            break
-                        try:
-                            for el in page.query_selector_all(sel)[:5]:
-                                if _time.monotonic() > deadline:
-                                    break
-                                try:
-                                    el.scroll_into_view_if_needed(timeout=800)
-                                    el.click(timeout=800, force=True, no_wait_after=True)
-                                    page.wait_for_timeout(250)
-                                    _collect_html_scripts()
-                                except Exception:
-                                    pass
-                        except Exception:
-                            pass
-                    for el in (page.query_selector_all("nav li, .dropdown, [data-hover]") or [])[:10]:
-                        if _time.monotonic() > deadline:
-                            break
-                        try:
-                            el.hover(timeout=500)
-                            page.wait_for_timeout(250)
-                            _collect_html_scripts()
-                        except Exception:
-                            pass
-                except Exception:
-                    pass
-
-            def _crawl_deep():
-                _crawl_medium()
-                origin = _urlparse(url)
-                base_origin = f"{origin.scheme}://{origin.netloc}"
-                visited = {url}
-
-                # Collect links from main page only
-                try:
-                    links = page.evaluate("""
-                        (base) => {
-                            const seen = new Set();
-                            return Array.from(document.querySelectorAll('a[href]'))
-                                .map(a => a.href.split('?')[0].split('#')[0])
-                                .filter(h => h.startsWith(base) && h !== base + '/' && !seen.has(h) && seen.add(h))
-                        }
-                    """, base_origin)
-                    # Deduplicate and limit queue
-                    queue = []
-                    for l in (links or []):
-                        if l not in visited and l not in queue:
-                            queue.append(l)
-                        if len(queue) >= crawl_depth:
-                            break
-                except Exception:
-                    queue = []
-
-                print(f"[crawl:deep] found {len(links or [])} link(s), queued {len(queue)}")
-                for l in queue[:5]:
-                    print(f"[crawl:deep]   → {l}")
-
-                for i, link in enumerate(queue):
-                    visited.add(link)
-                    before = len(js_urls)
+                for el in (page.query_selector_all("nav li, .dropdown, [data-hover]") or [])[:10]:
+                    if _time.monotonic() > deadline:
+                        break
                     try:
-                        resp = page.goto(link, timeout=8000, wait_until="domcontentloaded")
-                        if resp and resp.status < 400:
-                            page.wait_for_timeout(500)
-                            _collect_html_scripts()
-                            new_js = len(js_urls) - before
-                            print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → +{new_js} JS")
-                        else:
-                            status = resp.status if resp else "err"
-                            print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → skip ({status})")
+                        el.hover(timeout=500)
+                        page.wait_for_timeout(250)
+                        _collect_html_scripts()
                     except Exception:
-                        print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → error")
+                        pass
+            except Exception:
+                pass
 
-            if crawl_mode == "medium":
-                print(f"[crawl:medium] starting interaction crawl...")
-                _crawl_medium()
-                print(f"[crawl:medium] done, {len(js_urls)} JS total")
-            elif crawl_mode == "deep":
-                print(f"[crawl:deep] starting deep crawl (depth={crawl_depth})...")
-                _crawl_deep()
-                print(f"[crawl:deep] done, {len(js_urls)} JS total")
+        def _crawl_deep():
+            _crawl_medium()
+            origin = _urlparse(url)
+            base_origin = f"{origin.scheme}://{origin.netloc}"
+            visited = {url}
 
-            # ── Cloudflare detection ──────────────────────────────
-            is_cloudflare = False
+            # Collect links from main page only
             try:
-                cf_headers = page.evaluate("""
+                links = page.evaluate("""
+                    (base) => {
+                        const seen = new Set();
+                        return Array.from(document.querySelectorAll('a[href]'))
+                            .map(a => a.href.split('?')[0].split('#')[0])
+                            .filter(h => h.startsWith(base) && h !== base + '/' && !seen.has(h) && seen.add(h))
+                    }
+                """, base_origin)
+                # Deduplicate and limit queue
+                queue = []
+                for l in (links or []):
+                    if l not in visited and l not in queue:
+                        queue.append(l)
+                    if len(queue) >= crawl_depth:
+                        break
+            except Exception:
+                queue = []
+
+            print(f"[crawl:deep] found {len(links or [])} link(s), queued {len(queue)}")
+            for l in queue[:5]:
+                print(f"[crawl:deep]   → {l}")
+
+            for i, link in enumerate(queue):
+                visited.add(link)
+                before = len(js_urls)
+                try:
+                    resp = page.goto(link, timeout=8000, wait_until="domcontentloaded")
+                    if resp and resp.status < 400:
+                        page.wait_for_timeout(500)
+                        _collect_html_scripts()
+                        new_js = len(js_urls) - before
+                        print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → +{new_js} JS")
+                    else:
+                        status = resp.status if resp else "err"
+                        print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → skip ({status})")
+                except Exception:
+                    print(f"[crawl:deep] [{i+1}/{len(queue)}] {link} → error")
+
+        if crawl_mode == "medium":
+            print(f"[crawl:medium] starting interaction crawl...")
+            _crawl_medium()
+            print(f"[crawl:medium] done, {len(js_urls)} JS total")
+        elif crawl_mode == "deep":
+            print(f"[crawl:deep] starting deep crawl (depth={crawl_depth})...")
+            _crawl_deep()
+            print(f"[crawl:deep] done, {len(js_urls)} JS total")
+
+        # ── Cloudflare detection ──────────────────────────────
+        is_cloudflare = False
+        try:
+            cf_headers = page.evaluate("""
+                () => {
+                    const metas = document.querySelectorAll('meta[name]');
+                    const title = document.title || '';
+                    const body = document.body ? document.body.innerText.slice(0, 500) : '';
+                    return {title, body};
+                }
+            """)
+            title = cf_headers.get('title', '').lower()
+            body = cf_headers.get('body', '').lower()
+            blocked_markers = [
+                'just a moment', 'cloudflare', 'attention required',
+                'access denied', 'request blocked', 'too many requests',
+                'temporarily blocked', 'unusual traffic', 'bot detection',
+            ]
+            if any(x in title for x in blocked_markers):
+                is_cloudflare = True
+            elif any(x in body for x in [
+                'checking your browser', 'cf-browser-verification',
+                'access denied', 'request blocked', 'too many requests',
+                'temporarily blocked', 'unusual traffic', 'bot detection',
+            ]):
+                is_cloudflare = True
+        except Exception:
+            pass
+
+        # Check response headers via network interception result
+        if not is_cloudflare:
+            try:
+                resp = page.evaluate("""
                     () => {
-                        const metas = document.querySelectorAll('meta[name]');
-                        const title = document.title || '';
-                        const body = document.body ? document.body.innerText.slice(0, 500) : '';
-                        return {title, body};
+                        const cookies = document.cookie;
+                        return cookies.includes('cf_clearance') || cookies.includes('__cf_bm');
                     }
                 """)
-                title = cf_headers.get('title', '').lower()
-                body = cf_headers.get('body', '').lower()
-                if any(x in title for x in ['just a moment', 'cloudflare', 'attention required']):
-                    is_cloudflare = True
-                elif 'checking your browser' in body or 'cf-browser-verification' in body:
-                    is_cloudflare = True
+                # If cf_clearance exists, we passed CF — not blocked
             except Exception:
                 pass
 
-            # Check response headers via network interception result
-            if not is_cloudflare:
+        # ── Extract cookies for httpx reuse ───────────────────────
+        session_cookies: dict = {}
+        try:
+            raw_cookies = ctx.cookies()
+            session_cookies = {c['name']: c['value'] for c in raw_cookies}
+            # Flag as cloudflare if cf cookies present
+            if 'cf_clearance' in session_cookies or '__cf_bm' in session_cookies:
+                is_cloudflare = True
+        except Exception:
+            pass
+
+    except Exception:
+        traceback.print_exc(file=sys.stderr)
+    finally:
+        for resource in (page, ctx, browser):
+            if resource is not None:
                 try:
-                    resp = page.evaluate("""
-                        () => {
-                            const cookies = document.cookie;
-                            return cookies.includes('cf_clearance') || cookies.includes('__cf_bm');
-                        }
-                    """)
-                    # If cf_clearance exists, we passed CF — not blocked
+                    resource.close()
                 except Exception:
                     pass
 
-            # ── Extract cookies for httpx reuse ───────────────────────
-            session_cookies: dict = {}
-            try:
-                raw_cookies = ctx.cookies()
-                session_cookies = {c['name']: c['value'] for c in raw_cookies}
-                # Flag as cloudflare if cf cookies present
-                if 'cf_clearance' in session_cookies or '__cf_bm' in session_cookies:
-                    is_cloudflare = True
-            except Exception:
-                pass
-
-            browser.close()
-    except Exception:
-        pass
-
-    return js_urls, page_build_id, session_cookies, is_cloudflare
+    return js_urls, page_build_id, session_cookies, is_cloudflare, page_loaded
 
 
 async def collect_js_playwright(
@@ -424,7 +508,7 @@ async def collect_js_playwright(
 ) -> tuple[list[str], str | None]:
     """
     Async wrapper — runs _playwright_worker in a separate process.
-    Hard kill via executor timeout prevents event loop blocking.
+    Runs the synchronous worker with a bounded wait.
     """
     loop = asyncio.get_running_loop()
     extra = {"none": 10, "medium": 30, "deep": 60}.get(crawl_mode, 10)
@@ -439,10 +523,12 @@ async def collect_js_playwright(
         )
         return result
     except asyncio.TimeoutError:
+        _debug_event("C", "Playwright timeout", {"url": url, "crawl_mode": crawl_mode, "timeout": hard_timeout})
         _hit(f"Playwright hard-timeout ({hard_timeout}s) — попробуй увеличить -t/--timeout или отключить --crawl")
-        return [], None, {}, False
+        return [], None, {}, False, False
     except Exception:
-        return [], None, {}, False
+        _debug_event("B", "Playwright collection exception", {"url": url, "crawl_mode": crawl_mode})
+        return [], None, {}, False, False
 
 
 # ─── Stage 2: Brute-force sibling JS files ───────────────────────────────────
@@ -599,6 +685,7 @@ def save_domain_report(
     js_urls: list[str],
     bruted: list[str],
     is_cloudflare: bool,
+    status: str,
 ):
     """
     Build and write a single domain_report.json that aggregates everything:
@@ -612,6 +699,7 @@ def save_domain_report(
     """
     report: dict = {
         "domain":              base_url,
+        "status":              status,
         "cloudflare":          is_cloudflare,
         "js_urls_playwright":  sorted(set(js_urls)),
         "js_urls_bruted":      sorted(set(bruted)),
@@ -921,12 +1009,13 @@ async def process_subdomain(
 
     slug = domain_slug(url)
     async with semaphore:
+        _debug_event("B", "domain processing started", {"domain": url, "slug": slug, "crawl_mode": crawl_mode})
         _PREFIX_VAR.set(slug)
         print(f"{_c(_C_DIM, '[' + slug + ']')} {_C_BOLD}[*]{_C_RESET} {url}")
 
         # Stage 1 — collect JS via headless browser
         try:
-            js_urls, page_build_id, pw_cookies, is_cloudflare = await collect_js_playwright(
+            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded = await collect_js_playwright(
                 url, timeout=timeout, custom_headers=custom_headers,
                 executor=pw_executor,
                 crawl_mode=crawl_mode,
@@ -934,7 +1023,7 @@ async def process_subdomain(
             )
         except Exception as e:
             print(f"{_pfx()}{_c(_C_RED, "[!]")} Playwright error: {e}", file=sys.stderr)
-            js_urls, page_build_id, pw_cookies, is_cloudflare = [], None, {}, False
+            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded = [], None, {}, False, False
 
         if is_cloudflare:
             print(f"{_pfx()}{_c(_C_YELLOW, "[cf]")} Cloudflare detected — brute disabled, using browser cookies for downloads")
@@ -1039,8 +1128,27 @@ async def process_subdomain(
             js_urls       = target_js,
             bruted        = bruted,
             is_cloudflare = is_cloudflare,
+            status        = "blocked" if is_cloudflare else ("processed" if page_loaded else "error"),
         )
+        _debug_event("B", "domain report saved", {"domain": url, "status": "blocked" if is_cloudflare else ("processed" if page_loaded else "error"), "js_count": len(target_js), "brute_count": len(bruted)})
         _ok(f"Report → {_c(_C_DIM, str(report_path))}")
+
+
+async def process_subdomain_safe(*args, **kwargs):
+    raw = args[0] if args else kwargs.get("raw", "")
+    output_dir = args[1] if len(args) > 1 else kwargs["output_dir"]
+    try:
+        return await process_subdomain(*args, **kwargs)
+    except asyncio.CancelledError:
+        raise
+    except Exception as exc:
+        url = normalize(raw)
+        if url:
+            domain_dir = output_dir / domain_slug(url)
+            domain_dir.mkdir(parents=True, exist_ok=True)
+            save_domain_report(domain_dir, url, [], [], False, "error")
+            _debug_event("B", "domain task exception and error report saved", {"domain": url, "error": type(exc).__name__})
+        print(f"{_pfx()}{_c(_C_RED, '[!]')} Domain error: {exc}", file=sys.stderr)
 
 
 
@@ -1515,7 +1623,9 @@ def cleanup_empty_domains(output_dir: Path) -> list[str]:
         has_js_files  = js_dir.exists() and any(js_dir.rglob("*.js"))
         has_sources   = sources_dir.exists() and any(sources_dir.rglob("*"))
 
-        if not (has_js_urls or has_bruted or has_js_files or has_sources):
+        has_report = (domain_dir / "domain_report.json").is_file()
+
+        if not (has_js_urls or has_bruted or has_js_files or has_sources or has_report):
             shutil.rmtree(domain_dir)
             removed.append(domain_dir.name)
 
@@ -1574,6 +1684,25 @@ async def main():
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    pending_subdomains = []
+    skipped_subdomains = []
+    for subdomain in subdomains:
+        if is_domain_processed(output_dir, subdomain):
+            skipped_subdomains.append(subdomain)
+        else:
+            pending_subdomains.append(subdomain)
+
+    _debug_event("A", "domain queue prepared", {"input_count": len(subdomains), "pending_count": len(pending_subdomains), "skipped_count": len(skipped_subdomains)})
+
+    if skipped_subdomains:
+        print(f"[*] Skipping {len(skipped_subdomains)} domain(s) with existing results")
+        for subdomain in skipped_subdomains:
+            print(f"  [-] {subdomain}")
+
+    if not pending_subdomains:
+        print("\n[✓] Nothing to scan.")
+        return
+
     headers = parse_headers(args.header)
 
     sem = asyncio.Semaphore(args.concurrency)
@@ -1581,7 +1710,7 @@ async def main():
     # Prevents event loop blocking when a browser hangs
     pw_executor = ProcessPoolExecutor(max_workers=args.concurrency)
     tasks = [
-        process_subdomain(
+        process_subdomain_safe(
             sub, output_dir, wordlist, args.timeout, sem,
             args.verbose, args.download,
             custom_headers=headers,
@@ -1592,14 +1721,27 @@ async def main():
             crawl_mode=args.crawl,
             crawl_depth=args.crawl_depth,
         )
-        for sub in subdomains
+        for sub in pending_subdomains
     ]
 
-    print(f"[*] Starting recon on {len(subdomains)} subdomain(s)\n")
+    print(f"[*] Starting recon on {len(pending_subdomains)} subdomain(s)\n")
     try:
-        await asyncio.gather(*tasks)
+        _debug_event("D", "gather started", {"task_count": len(tasks), "crawl_mode": args.crawl, "concurrency": args.concurrency})
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        failures = [result for result in results if isinstance(result, Exception)]
+        if failures:
+            _debug_event("B", "domain tasks failed", {"failure_count": len(failures), "task_count": len(tasks)})
+            for failure in failures:
+                print(f"[!] Domain task failed: {failure}", file=sys.stderr)
     finally:
+        _debug_event("D", "executor shutdown requested", {"wait": False, "cancel_futures": True})
+        workers = list(getattr(pw_executor, "_processes", {}).values())
         pw_executor.shutdown(wait=False, cancel_futures=True)
+        for worker in workers:
+            if worker.is_alive():
+                worker.terminate()
+        for worker in workers:
+            worker.join(timeout=5)
 
     # Cleanup empty domain directories
     cleaned = cleanup_empty_domains(output_dir)
@@ -1609,6 +1751,7 @@ async def main():
             print(f"  [-] {d}")
 
     print("\n[✓] Done.")
+    _debug_event("D", "main completed", {"pending_count": len(pending_subdomains)})
 
 
 if __name__ == "__main__":
@@ -1616,6 +1759,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
-    finally:
-        import os
-        os._exit(0)

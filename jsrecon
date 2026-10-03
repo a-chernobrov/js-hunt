@@ -40,6 +40,7 @@ usage() {
     echo -e "${BOLD}SCAN OPTIONS${RESET}"
     echo    "  -d, --download          Download all found JS files"
     echo    "  -w, --wordlist <file>   Custom JS wordlist"
+    echo    "  -H, --header <hdr>      Custom HTTP header (repeatable, e.g. -H 'Cookie: x=y')"
     echo    "  -t, --timeout <sec>     Page load timeout (default: 20)"
     echo    "  -c, --concurrency <n>   Parallel subdomains (default: 3)"
     echo    "  -o, --output <dir>      Output dir (default: ./output)"
@@ -139,6 +140,8 @@ parse_args() {
                 SCAN_ARGS+=("--brute-concurrency" "$2"); shift 2 ;;
             --brute-delay)
                 SCAN_ARGS+=("--brute-delay" "$2"); shift 2 ;;
+            -H|--header)
+                SCAN_ARGS+=("-H" "$2"); shift 2 ;;
             -j|--jobs)
                 GREP_ARGS+=("-j" "$2"); shift 2 ;;
             --json)

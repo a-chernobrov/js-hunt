@@ -1,0 +1,30 @@
+{
+  "domain": "https://cpda.x5.ru",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://cpda.x5.ru/assets/index-C3_SqzDx.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "summary": {
+    "js_count": 1,
+    "js_playwright": 1,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 0,
+    "sensitive_count": 0
+  }
+}
