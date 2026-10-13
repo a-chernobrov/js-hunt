@@ -1,9 +1,0 @@
-https://173.242.56.219/_next/static/chunks/117-29618c6b1981a6da.js
-https://173.242.56.219/_next/static/chunks/262-a06d9ec0b2063329.js
-https://173.242.56.219/_next/static/chunks/310-94c9e09209054690.js
-https://173.242.56.219/_next/static/chunks/app/auth/login/page-164d407e4d36d1a0.js
-https://173.242.56.219/_next/static/chunks/app/layout-c2793fda90d738ec.js
-https://173.242.56.219/_next/static/chunks/fd9d1056-cdff743893fff928.js
-https://173.242.56.219/_next/static/chunks/main-app-34f79052dc7af6f4.js
-https://173.242.56.219/_next/static/chunks/polyfills-42372ed130431b0a.js
-https://173.242.56.219/_next/static/chunks/webpack-616e068a201ad621.js

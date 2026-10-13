@@ -1,6 +1,0 @@
-https://87.76.204.35/_next/static/chunks/117-fc73271fc24037f1.js
-https://87.76.204.35/_next/static/chunks/app/page-00659aea43461299.js
-https://87.76.204.35/_next/static/chunks/fd9d1056-5f55067fad1d0619.js
-https://87.76.204.35/_next/static/chunks/main-app-feceaf618f25fa92.js
-https://87.76.204.35/_next/static/chunks/polyfills-42372ed130431b0a.js
-https://87.76.204.35/_next/static/chunks/webpack-8658fdbc42bfbbae.js

@@ -1,5 +1,0 @@
-https://87.76.162.25/angular-DvxoCOxF.js
-https://87.76.162.25/main-DalJsaSv.js
-https://87.76.162.25/ngroute-BLrKj7mz.js
-https://87.76.162.25/pikaday-BPmP6VPJ.js
-https://87.76.162.25/vue-rC2LzHRg.js

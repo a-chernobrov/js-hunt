@@ -1,9 +1,0 @@
-https://173.242.59.49/_next/static/chunks/069tmpceiwovm.js
-https://173.242.59.49/_next/static/chunks/06z9j7lk94lr4.js
-https://173.242.59.49/_next/static/chunks/0cz1d0mv5g_q7.js
-https://173.242.59.49/_next/static/chunks/0vu398whx4waf.js
-https://173.242.59.49/_next/static/chunks/19mx3mg6lkumu.js
-https://173.242.59.49/_next/static/chunks/27t_qfc-3_lzs.js
-https://173.242.59.49/_next/static/chunks/310vm2bl3xxpt.js
-https://173.242.59.49/_next/static/chunks/3fntmmi971322.js
-https://173.242.59.49/_next/static/chunks/turbopack-349dfx8pn6mb9.js

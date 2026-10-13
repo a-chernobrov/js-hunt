@@ -1,3 +1,0 @@
-http://45.150.110.70/assets/js/main.js?v=5
-http://45.150.110.70/assets/js/noti.js?v=3
-http://45.150.110.70/assets/js/toastr.js

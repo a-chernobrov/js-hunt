@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[5405],{48312:function(n,u,_){(window.__NEXT_P=window.__NEXT_P||[]).push(["/",function(){return _(75303)}])},75303:function(n,u,_){"use strict";_.r(u);var t=_(85893);u.default=()=>(0,t.jsx)(t.Fragment,{children:"TEFFY.ME"})}},function(n){n.O(0,[9774,2888,179],function(){return n(n.s=48312)}),_N_E=n.O()}]);
