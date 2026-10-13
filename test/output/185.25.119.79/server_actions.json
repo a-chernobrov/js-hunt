@@ -1,0 +1,28 @@
+{
+  "base_url": "https://185.25.119.79",
+  "build_id": null,
+  "detected": true,
+  "count": 1,
+  "methods": {
+    "js": 1,
+    "sources": 0,
+    "next_data": 0
+  },
+  "signals": {
+    "next-action header": 1,
+    "use server directive": 1,
+    "flight data __next_f": 1
+  },
+  "manifests": [],
+  "modules": [],
+  "probes": [],
+  "actions": [
+    {
+      "id": "7f71b98e27b81893fc7adc8680c4230cc2e17efbbd",
+      "source": "js",
+      "file": "js/_next_static_chunks_app_catalog_page-565c07d7f0c53d3b.js",
+      "pattern": "createServerReference",
+      "context": "=s(5027),u=s(3589),x=s(5828);let g=(0,x.createServerReference)(\"7f71b98e27b81893fc7adc8680c4230cc2e17efbbd\",x.callServer,void 0,x.findSourceMapURL,"
+    }
+  ]
+}

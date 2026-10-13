@@ -1,0 +1,106 @@
+{
+  "domain": "https://173.242.56.219",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://173.242.56.219/_next/static/chunks/117-29618c6b1981a6da.js",
+    "https://173.242.56.219/_next/static/chunks/262-a06d9ec0b2063329.js",
+    "https://173.242.56.219/_next/static/chunks/310-94c9e09209054690.js",
+    "https://173.242.56.219/_next/static/chunks/app/auth/login/page-164d407e4d36d1a0.js",
+    "https://173.242.56.219/_next/static/chunks/app/layout-c2793fda90d738ec.js",
+    "https://173.242.56.219/_next/static/chunks/fd9d1056-cdff743893fff928.js",
+    "https://173.242.56.219/_next/static/chunks/main-app-34f79052dc7af6f4.js",
+    "https://173.242.56.219/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "https://173.242.56.219/_next/static/chunks/webpack-616e068a201ad621.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://173.242.56.219",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 9,
+    "js_playwright": 9,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 2,
+    "sensitive_count": 1
+  },
+  "grepper": {
+    "files_scanned": 9,
+    "size_mb": 0.51,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/auth/login\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+          "note": null,
+          "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+          "domain": "173.242.56.219",
+          "file_count": 3
+        },
+        {
+          "value": "\"/api/auth/register\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+          "note": null,
+          "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+          "domain": "173.242.56.219",
+          "file_count": 3
+        }
+      ]
+    },
+    "sensitive": {
+      "Admin/Dashboard": [
+        {
+          "value": "\"/dashboard\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+          "note": null,
+          "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+          "domain": "173.242.56.219",
+          "file_count": 10
+        }
+      ]
+    }
+  }
+}

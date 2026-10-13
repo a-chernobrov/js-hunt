@@ -1,0 +1,80 @@
+{
+  "domain": "https://173.242.59.49",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://173.242.59.49/_next/static/chunks/069tmpceiwovm.js",
+    "https://173.242.59.49/_next/static/chunks/06z9j7lk94lr4.js",
+    "https://173.242.59.49/_next/static/chunks/0cz1d0mv5g_q7.js",
+    "https://173.242.59.49/_next/static/chunks/0vu398whx4waf.js",
+    "https://173.242.59.49/_next/static/chunks/19mx3mg6lkumu.js",
+    "https://173.242.59.49/_next/static/chunks/27t_qfc-3_lzs.js",
+    "https://173.242.59.49/_next/static/chunks/310vm2bl3xxpt.js",
+    "https://173.242.59.49/_next/static/chunks/3fntmmi971322.js",
+    "https://173.242.59.49/_next/static/chunks/turbopack-349dfx8pn6mb9.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://173.242.59.49",
+    "build_id": null,
+    "detected": true,
+    "count": 1,
+    "methods": {
+      "js": 1,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": [
+      {
+        "id": "60f32b39a3ce9d0d60065b2f6daf1fe3b6e32d3115",
+        "source": "js",
+        "file": "js/_next_static_chunks_069tmpceiwovm.js",
+        "pattern": "createServerReference",
+        "context": "6),d=e.i(95749),s=e.i(95187);let o=(0,s.createServerReference)(\"60f32b39a3ce9d0d60065b2f6daf1fe3b6e32d3115\",s.callServer,void 0,s.findSourceMapURL,"
+      }
+    ]
+  },
+  "summary": {
+    "js_count": 9,
+    "js_playwright": 9,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": true,
+    "server_actions_count": 1,
+    "server_actions_methods": {
+      "js": 1,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 0,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 9,
+    "size_mb": 0.565,
+    "secrets": {},
+    "apis": {},
+    "sensitive": {}
+  }
+}

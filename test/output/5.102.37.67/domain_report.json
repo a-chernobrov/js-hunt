@@ -1,0 +1,104 @@
+{
+  "domain": "https://5.102.37.67",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://5.102.37.67/_next/static/chunks/0cz1d0mv5g_q7.js",
+    "https://5.102.37.67/_next/static/chunks/149a_yi3kke_m.js",
+    "https://5.102.37.67/_next/static/chunks/1zzmey5blsba1.js",
+    "https://5.102.37.67/_next/static/chunks/2mmpezlrfmbu5.js",
+    "https://5.102.37.67/_next/static/chunks/310vm2bl3xxpt.js",
+    "https://5.102.37.67/_next/static/chunks/3e4keds9ktjdu.js",
+    "https://5.102.37.67/_next/static/chunks/3vzzdzv7cltpr.js",
+    "https://5.102.37.67/_next/static/chunks/turbopack-042tbm33j4dqp.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://5.102.37.67",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 8,
+    "js_playwright": 8,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 2,
+    "sensitive_count": 1
+  },
+  "grepper": {
+    "files_scanned": 8,
+    "size_mb": 0.555,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/wishlist\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,77229,t=>{\"use strict\";var e=t.i(43476),o=t.i(71645),r=t.i(18566);t.s([\"default\",0,funct",
+          "note": null,
+          "file": "output/5.102.37.67/js/_next_static_chunks_3vzzdzv7cltpr.js",
+          "domain": "5.102.37.67",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/auth/logout\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,22016,(e,t,r)=>{\"use strict\";e.i(47167),Object.defineProperty(r,\"__esModule\",{value:!0})",
+          "note": null,
+          "file": "output/5.102.37.67/js/_next_static_chunks_1zzmey5blsba1.js",
+          "domain": "5.102.37.67",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {
+      "Auth Endpoints": [
+        {
+          "value": "\"/login?",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,77229,t=>{\"use strict\";var e=t.i(43476),o=t.i(71645),r=t.i(18566);t.s([\"default\",0,funct",
+          "note": null,
+          "file": "output/5.102.37.67/js/_next_static_chunks_3vzzdzv7cltpr.js",
+          "domain": "5.102.37.67",
+          "file_count": 1
+        }
+      ]
+    }
+  }
+}

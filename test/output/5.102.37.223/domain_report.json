@@ -1,0 +1,116 @@
+{
+  "domain": "https://5.102.37.223",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://5.102.37.223/_next/static/chunks/0cz1d0mv5g_q7.js",
+    "https://5.102.37.223/_next/static/chunks/11pxbv08d7b0-.js",
+    "https://5.102.37.223/_next/static/chunks/194-s0z_1-_9k.js",
+    "https://5.102.37.223/_next/static/chunks/19mx3mg6lkumu.js",
+    "https://5.102.37.223/_next/static/chunks/1iif4-c6bdayb.js",
+    "https://5.102.37.223/_next/static/chunks/1qydffoiimuwc.js",
+    "https://5.102.37.223/_next/static/chunks/2-rtuqsgzmno4.js",
+    "https://5.102.37.223/_next/static/chunks/2f056c37kqk1t.js",
+    "https://5.102.37.223/_next/static/chunks/2nosedqx5b6m5.js",
+    "https://5.102.37.223/_next/static/chunks/3qcv3c4htp-5x.js",
+    "https://5.102.37.223/_next/static/chunks/3r53__o7hwdi2.js",
+    "https://5.102.37.223/_next/static/chunks/3s6nzrbk-8mnv.js",
+    "https://5.102.37.223/_next/static/chunks/3y6ph63zgg15-.js",
+    "https://5.102.37.223/_next/static/chunks/turbopack-3pex5iqcgnby2.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://5.102.37.223",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "flight data __next_f": 1,
+      "next-action header": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 14,
+    "js_playwright": 14,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 4,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 14,
+    "size_mb": 0.888,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/public/site\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,22016,(e,t,r)=>{\"use strict\";e.i(47167),Object.defineProperty(r,\"__esModule\",{value:!0})",
+          "note": null,
+          "file": "output/5.102.37.223/js/_next_static_chunks_3qcv3c4htp-5x.js",
+          "domain": "5.102.37.223",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/customer/logout\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,19172,e=>{\"use strict\";var s=e.i(43476),t=e.i(71645),a=e.i(18566),l=e.i(22016),r=e.i(161",
+          "note": null,
+          "file": "output/5.102.37.223/js/_next_static_chunks_2nosedqx5b6m5.js",
+          "domain": "5.102.37.223",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/customer/me\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,19172,e=>{\"use strict\";var s=e.i(43476),t=e.i(71645),a=e.i(18566),l=e.i(22016),r=e.i(161",
+          "note": null,
+          "file": "output/5.102.37.223/js/_next_static_chunks_2nosedqx5b6m5.js",
+          "domain": "5.102.37.223",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/customer/orders\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,19172,e=>{\"use strict\";var s=e.i(43476),t=e.i(71645),a=e.i(18566),l=e.i(22016),r=e.i(161",
+          "note": null,
+          "file": "output/5.102.37.223/js/_next_static_chunks_2nosedqx5b6m5.js",
+          "domain": "5.102.37.223",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {}
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "files_scanned": 21,
+  "size_mb": 0.799,
+  "secrets": {},
+  "apis": {},
+  "sensitive": {
+    "Config/Env": [
+      {
+        "value": "\"/config/",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[636],{408:(e,t,n)=>{\"use strict\";n.d(t,{Ay:()=>a});var i=n(3836),r=!1,s=!1;try{var o={get passive(){return r=!0},get once(){return s=r=!0}};i.A",
+        "note": null,
+        "file": "output/45.129.99.103/js/_next_static_chunks_pages__app-5ffc436951d4da22.js",
+        "domain": "45.129.99.103",
+        "file_count": 1
+      }
+    ],
+    "Auth Endpoints": [
+      {
+        "value": "\"/callback/",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[636],{408:(e,t,n)=>{\"use strict\";n.d(t,{Ay:()=>a});var i=n(3836),r=!1,s=!1;try{var o={get passive(){return r=!0},get once(){return s=r=!0}};i.A",
+        "note": null,
+        "file": "output/45.129.99.103/js/_next_static_chunks_pages__app-5ffc436951d4da22.js",
+        "domain": "45.129.99.103",
+        "file_count": 1
+      }
+    ],
+    "Webhook/Callback": [
+      {
+        "value": "\"/callback/",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[636],{408:(e,t,n)=>{\"use strict\";n.d(t,{Ay:()=>a});var i=n(3836),r=!1,s=!1;try{var o={get passive(){return r=!0},get once(){return s=r=!0}};i.A",
+        "note": null,
+        "file": "output/45.129.99.103/js/_next_static_chunks_pages__app-5ffc436951d4da22.js",
+        "domain": "45.129.99.103",
+        "file_count": 1
+      }
+    ]
+  }
+}

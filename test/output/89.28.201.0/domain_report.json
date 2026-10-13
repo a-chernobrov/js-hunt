@@ -1,0 +1,52 @@
+{
+  "domain": "https://89.28.201.0",
+  "status": "error",
+  "cloudflare": false,
+  "js_urls_playwright": [],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://89.28.201.0",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {},
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 0,
+    "js_playwright": 0,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 0,
+    "sensitive_count": 0
+  }
+}

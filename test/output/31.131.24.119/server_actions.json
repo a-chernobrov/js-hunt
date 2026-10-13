@@ -1,0 +1,18 @@
+{
+  "base_url": "https://31.131.24.119",
+  "build_id": "uaV1gSI4ooQGrJLla4hcY",
+  "detected": false,
+  "count": 0,
+  "methods": {
+    "js": 0,
+    "sources": 0,
+    "next_data": 0
+  },
+  "signals": {
+    "server-reference-manifest": 1
+  },
+  "manifests": [],
+  "modules": [],
+  "probes": [],
+  "actions": []
+}

@@ -1,0 +1,21 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9160],{68641:function(e,t,r){Promise.resolve().then(r.bind(r,28667))},87461:function(e,t,r){"use strict";r.d(t,{Z:function(){return i}});var a=r(64090),n={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+ * @license lucide-react v0.323.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let s=e=>e.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase().trim(),i=(e,t)=>{let r=(0,a.forwardRef)((r,i)=>{let{color:c="currentColor",size:l=24,strokeWidth:d=2,absoluteStrokeWidth:o,className:m="",children:u,...x}=r;return(0,a.createElement)("svg",{ref:i,...n,width:l,height:l,stroke:c,strokeWidth:o?24*Number(d)/Number(l):d,className:["lucide","lucide-".concat(s(e)),m].join(" "),...x},[...t.map(e=>{let[t,r]=e;return(0,a.createElement)(t,r)}),...Array.isArray(u)?u:[u]])});return r.displayName="".concat(e),r}},53879:function(e,t,r){"use strict";r.d(t,{Z:function(){return a}});/**
+ * @license lucide-react v0.323.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let a=(0,r(87461).Z)("ArrowLeft",[["path",{d:"m12 19-7-7 7-7",key:"1l729n"}],["path",{d:"M19 12H5",key:"x3x0zl"}]])},35005:function(e,t,r){"use strict";r.d(t,{Z:function(){return a}});/**
+ * @license lucide-react v0.323.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let a=(0,r(87461).Z)("Home",[["path",{d:"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",key:"y5dka4"}],["polyline",{points:"9 22 9 12 15 12 15 22",key:"e2us08"}]])},28670:function(e,t,r){"use strict";r.d(t,{Z:function(){return a}});/**
+ * @license lucide-react v0.323.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let a=(0,r(87461).Z)("Search",[["circle",{cx:"11",cy:"11",r:"8",key:"4ej97u"}],["path",{d:"m21 21-4.3-4.3",key:"1qie3q"}]])},8792:function(e,t,r){"use strict";r.d(t,{default:function(){return n.a}});var a=r(25250),n=r.n(a)},28667:function(e,t,r){"use strict";r.r(t),r.d(t,{default:function(){return l}});var a=r(3827),n=r(8792),s=r(28670),i=r(53879),c=r(35005);function l(){return(0,a.jsx)("div",{className:"min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-white to-primary/10 dark:from-dark-bg dark:via-dark-bg dark:to-dark-card p-4",children:(0,a.jsxs)("div",{className:"text-center max-w-lg animate-fade-in",children:[(0,a.jsx)("div",{className:"inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-3xl mb-6",children:(0,a.jsx)(s.Z,{size:40,className:"text-primary"})}),(0,a.jsx)("h1",{className:"text-8xl font-black text-primary/20 leading-none select-none",children:"404"}),(0,a.jsx)("h2",{className:"text-2xl font-bold text-gray-800 dark:text-gray-100 mt-4 mb-2",children:"Sayfa Bulunamadı"}),(0,a.jsx)("p",{className:"text-gray-500 dark:text-gray-400 text-sm mb-8 max-w-sm mx-auto",children:"Aradığınız sayfa taşınmış, silinmiş veya hi\xe7 var olmamış olabilir."}),(0,a.jsxs)("div",{className:"flex items-center justify-center gap-3",children:[(0,a.jsxs)("button",{onClick:()=>window.history.back(),className:"btn border border-light-border dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-card px-5 py-2.5 text-sm flex items-center gap-2",children:[(0,a.jsx)(i.Z,{size:16}),"Geri D\xf6n"]}),(0,a.jsxs)(n.default,{href:"/",className:"btn btn-primary px-5 py-2.5 text-sm flex items-center gap-2",children:[(0,a.jsx)(c.Z,{size:16}),"Ana Sayfa"]})]}),(0,a.jsxs)("div",{className:"mt-12 flex items-center justify-center gap-2 text-xs text-gray-400",children:[(0,a.jsx)("span",{className:"text-primary font-black text-sm",children:"N"}),(0,a.jsx)("span",{children:"NİTRU"})]})]})})}}},function(e){e.O(0,[5250,2971,8069,1744],function(){return e(e.s=68641)}),_N_E=e.O()}]);

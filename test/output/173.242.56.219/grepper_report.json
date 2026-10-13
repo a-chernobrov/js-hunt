@@ -1,0 +1,40 @@
+{
+  "files_scanned": 9,
+  "size_mb": 0.51,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/auth/login\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+        "note": null,
+        "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+        "domain": "173.242.56.219",
+        "file_count": 3
+      },
+      {
+        "value": "\"/api/auth/register\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+        "note": null,
+        "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+        "domain": "173.242.56.219",
+        "file_count": 3
+      }
+    ]
+  },
+  "sensitive": {
+    "Admin/Dashboard": [
+      {
+        "value": "\"/dashboard\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[716],{3112:function(e,t,a){Promise.resolve().then(a.bind(a,1202))},1202:function(e,t,a){\"use strict\";a.r(t),a.d(t,{default:function(){return d}",
+        "note": null,
+        "file": "output/173.242.56.219/js/_next_static_chunks_app_auth_login_page-164d407e4d36d1a0.js",
+        "domain": "173.242.56.219",
+        "file_count": 10
+      }
+    ]
+  }
+}

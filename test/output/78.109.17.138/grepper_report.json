@@ -1,0 +1,559 @@
+{
+  "files_scanned": 13,
+  "size_mb": 0.816,
+  "secrets": {
+    "JWT Token": [
+      {
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indid3Bjc2h0cWtlZ3JsZmp1cG90Iiwicm9sZSI6ImFub24iLCJ",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[72],{3267:(e,t,r)=>{\"use strict\";r.d(t,{p:()=>i});var a=r(996);r(59080);var s=r(18914);function i({className:e,type:t,...r}){return(0,a.jsx)(\"i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_app_(auth)_login_page-aafaf3960b91bcfe.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      }
+    ],
+    "Generic API Key": [
+      {
+        "value": "apikey:this.socket.apiKey",
+        "line_no": 6,
+        "context": "Suggested solution: ${e.workaround}`),Error(t)}static createWebSocket(e,t){return new(this.getWebSocketConstructor())(e,t)}static isWebSocketSupported(){try{let e=this.detectEnvironment();return\"nativ",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "apikey:this.supabaseKey",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      }
+    ],
+    "Internal IPv4": [
+      {
+        "value": "http://localhost:9999",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      }
+    ]
+  },
+  "apis": {
+    "Template Literal API": [
+      {
+        "value": "`${this.url}/rpc/",
+        "line_no": 4,
+        "context": "${l.stack}`)}else o=null!=(a=null==e?void 0:e.stack)?a:\"\";return{error:{message:`${null!=(t=null==e?void 0:e.name)?t:\"FetchError\"}: ${null==e?void 0:e.message}`,details:o,hint:\"\",code:\"\"},data:null,co",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.prefix}/namespaces",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.prefix}/namespaces/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/object/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/object/upload/sign/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/object/move",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/object/copy",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/object/sign/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${s.url}/object/sign/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/object/info/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/object/list/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/object/list-v2/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/bucket",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/bucket/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/bucket?",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/CreateIndex",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/GetIndex",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/ListIndexes",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/DeleteIndex",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/PutVectors",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/GetVectors",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/ListVectors",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/QueryVectors",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/DeleteVectors",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/CreateVectorBucket",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/GetVectorBucket",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/ListVectorBuckets",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/DeleteVectorBucket",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.url}/logout?scope=",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/invite",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/admin/generate_link",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/admin/users",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/admin/users/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/admin/oauth/clients",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/admin/oauth/clients/",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/signup",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/token?grant_type=password",
+        "line_no": 24,
+        "context": "})`);throw Error(`WebSocket not available: ${e}`)}this._setupConnectionHandlers()}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:this.vsn}))}disconnect(e,t){i",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/token?grant_type=web3",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/token?grant_type=pkce",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/token?grant_type=id_token",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/otp",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/verify",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/sso",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/reauthenticate",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/resend",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/user",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/recover",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/user/identities/authorize",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/user/identities/",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/token?grant_type=refresh_token",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/authorize",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/factors/",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/factors",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/oauth/authorizations/",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      },
+      {
+        "value": "`${this.url}/user/oauth/grants",
+        "line_no": 37,
+        "context": "${w}`}({domain:m.host,address:v,statement:y,uri:m.href,version:\"1\",chainId:_,nonce:null==(s=null==w?void 0:w.signInWithEthereum)?void 0:s.nonce,issuedAt:null!=(n=null==(i=null==w?void 0:w.signInWithEt",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      }
+    ],
+    "REST Resource": [
+      {
+        "value": "\"/api/broadcast\"",
+        "line_no": 6,
+        "context": "Suggested solution: ${e.workaround}`),Error(t)}static createWebSocket(e,t){return new(this.getWebSocketConstructor())(e,t)}static isWebSocketSupported(){try{let e=this.detectEnvironment();return\"nativ",
+        "note": null,
+        "file": "output/78.109.17.138/js/_next_static_chunks_3728-1fbcc0abee719aa5.js",
+        "domain": "78.109.17.138",
+        "file_count": 2
+      }
+    ]
+  },
+  "sensitive": {}
+}

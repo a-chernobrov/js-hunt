@@ -1,0 +1,111 @@
+{
+  "domain": "https://173.242.54.205",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://173.242.54.205/_next/static/chunks/0cz1d0mv5g_q7.js",
+    "https://173.242.54.205/_next/static/chunks/0ff2i1-myezhl.js",
+    "https://173.242.54.205/_next/static/chunks/0ha4m18glnjqn.js",
+    "https://173.242.54.205/_next/static/chunks/0omau7e6hrvej.js",
+    "https://173.242.54.205/_next/static/chunks/10b623fukbfzx.js",
+    "https://173.242.54.205/_next/static/chunks/14j_evo1nat2j.js",
+    "https://173.242.54.205/_next/static/chunks/16vywgtt3jvv8.js",
+    "https://173.242.54.205/_next/static/chunks/17_da-r812sab.js",
+    "https://173.242.54.205/_next/static/chunks/1bc-50-iv4evb.js",
+    "https://173.242.54.205/_next/static/chunks/1ucc3ablmc_br.js",
+    "https://173.242.54.205/_next/static/chunks/29lrohnrvwxy-.js",
+    "https://173.242.54.205/_next/static/chunks/33w5hgnkdfdp0.js",
+    "https://173.242.54.205/_next/static/chunks/34uqpbbp5z7ln.js",
+    "https://173.242.54.205/_next/static/chunks/3e5pyhxjaogeg.js",
+    "https://173.242.54.205/_next/static/chunks/41ru-rwhhqnql.js",
+    "https://173.242.54.205/_next/static/chunks/turbopack-28jpui74fm_n7.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://173.242.54.205",
+    "build_id": null,
+    "detected": true,
+    "count": 1,
+    "methods": {
+      "js": 1,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "use server directive": 1,
+      "flight data __next_f": 1,
+      "next-action header": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": [
+      {
+        "id": "402334cc13ee9c49337fcbe117968263ba3b309ce3",
+        "source": "js",
+        "file": "js/_next_static_chunks_1ucc3ablmc_br.js",
+        "pattern": "createServerReference",
+        "context": "use strict\";var t=e.i(95187);let r=(0,t.createServerReference)(\"402334cc13ee9c49337fcbe117968263ba3b309ce3\",t.callServer,void 0,t.findSourceMapURL,"
+      }
+    ]
+  },
+  "summary": {
+    "js_count": 16,
+    "js_playwright": 16,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": true,
+    "server_actions_count": 1,
+    "server_actions_methods": {
+      "js": 1,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 0,
+    "sensitive_count": 2
+  },
+  "grepper": {
+    "files_scanned": 16,
+    "size_mb": 0.802,
+    "secrets": {},
+    "apis": {},
+    "sensitive": {
+      "Admin/Dashboard": [
+        {
+          "value": "\"/admin\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,95057,(e,t,r)=>{\"use strict\";Object.defineProperty(r,\"__esModule\",{value:!0});var a={for",
+          "note": null,
+          "file": "output/173.242.54.205/js/_next_static_chunks_3e5pyhxjaogeg.js",
+          "domain": "173.242.54.205",
+          "file_count": 16
+        }
+      ],
+      "Auth Endpoints": [
+        {
+          "value": "\"/login\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,33525,(e,t,r)=>{\"use strict\";Object.defineProperty(r,\"__esModule\",{value:!0}),Object.def",
+          "note": null,
+          "file": "output/173.242.54.205/js/_next_static_chunks_1bc-50-iv4evb.js",
+          "domain": "173.242.54.205",
+          "file_count": 15
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base_url": "https://62.149.5.166",
+  "build_id": null,
+  "detected": false,
+  "count": 0,
+  "methods": {
+    "js": 0,
+    "sources": 0,
+    "next_data": 0
+  },
+  "signals": {
+    "next-action header": 1,
+    "use server directive": 1,
+    "flight data __next_f": 1
+  },
+  "manifests": [],
+  "modules": [],
+  "probes": [],
+  "actions": []
+}

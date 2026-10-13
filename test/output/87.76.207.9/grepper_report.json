@@ -1,0 +1,28 @@
+{
+  "files_scanned": 10,
+  "size_mb": 0.644,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/iletisim\"",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,84614,63488,43432,86311,69638,31278,e=>{\"use strict\";var a=e.i(75254);let s=(0,a.default",
+        "note": null,
+        "file": "output/87.76.207.9/js/_next_static_chunks_13i1g~d8df-r7.js",
+        "domain": "87.76.207.9",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/randevu\"",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,84614,63488,43432,86311,69638,31278,e=>{\"use strict\";var a=e.i(75254);let l=(0,a.default",
+        "note": null,
+        "file": "output/87.76.207.9/js/_next_static_chunks_0yoanpjmpk3nm.js",
+        "domain": "87.76.207.9",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {}
+}

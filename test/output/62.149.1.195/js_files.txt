@@ -1,0 +1,8 @@
+http://62.149.1.195/_next/static/T0zlRGhjjy_-NFQdyyzM-/_buildManifest.js
+http://62.149.1.195/_next/static/T0zlRGhjjy_-NFQdyyzM-/_ssgManifest.js
+http://62.149.1.195/_next/static/chunks/framework-0365125e11538b64.js
+http://62.149.1.195/_next/static/chunks/main-aaa81965d547c4ed.js
+http://62.149.1.195/_next/static/chunks/pages/_app-ac531d4bc940df9d.js
+http://62.149.1.195/_next/static/chunks/pages/index-ee43d42e87f4d087.js
+http://62.149.1.195/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js
+http://62.149.1.195/_next/static/chunks/webpack-d70c0e61f9bf15e7.js

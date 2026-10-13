@@ -1,0 +1,28 @@
+{
+  "files_scanned": 17,
+  "size_mb": 0.538,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/auth/providers\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9301],{4117:(e,t,r)=>{\"use strict\";r.d(t,{CartProvider:()=>c,_:()=>d});var a=r(5155),n=r(2115);let i=\"lospepes-cart\",s=\"lospepes-checkout\";func",
+        "note": null,
+        "file": "output/45.94.156.231/js/_next_static_chunks_9301-9f0c9f42934a3d37.js",
+        "domain": "45.94.156.231",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/contact-manager\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7177],{428:e=>{e.exports={root:\"ManagerContactWidget_root__vdqfJ\",launcher:\"ManagerContactWidget_launcher__3XTkP\",overlay:\"ManagerContactWidget",
+        "note": null,
+        "file": "output/45.94.156.231/js/_next_static_chunks_app_layout-897683b7836dc0e3.js",
+        "domain": "45.94.156.231",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {}
+}

@@ -1,0 +1,128 @@
+{
+  "domain": "https://45.94.157.75",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://45.94.157.75/_next/static/chunks/18.fec93d085d7f117d.js",
+    "https://45.94.157.75/_next/static/chunks/437-b4029f5457197dec.js",
+    "https://45.94.157.75/_next/static/chunks/4bd1b696-096d35a2bd1da3af.js",
+    "https://45.94.157.75/_next/static/chunks/500-000965d36b02c784.js",
+    "https://45.94.157.75/_next/static/chunks/636-a8580d8fa44d6a0e.js",
+    "https://45.94.157.75/_next/static/chunks/72.a8e31447ec05dbc4.js",
+    "https://45.94.157.75/_next/static/chunks/794-7b02e7a45009b8f4.js",
+    "https://45.94.157.75/_next/static/chunks/app/layout-ce8928f4f2a728ff.js",
+    "https://45.94.157.75/_next/static/chunks/app/not-found-25edd22b61c31ea0.js",
+    "https://45.94.157.75/_next/static/chunks/app/page-ce84f7032713692c.js",
+    "https://45.94.157.75/_next/static/chunks/main-app-51356db6866b9181.js",
+    "https://45.94.157.75/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "https://45.94.157.75/_next/static/chunks/webpack-aa6f48198f984af8.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://45.94.157.75",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 13,
+    "js_playwright": 13,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 1,
+    "apis_count": 4,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 13,
+    "size_mb": 0.573,
+    "secrets": {
+      "Bearer Token": [
+        {
+          "value": "\"Bearer 6a3241b9556f28e88017f6130d45a2f0f3617d17e900280a9edee589a33d95788b21f031d6b20cb283f1d0420975026104cd36c88466617b",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[72],{3072:(e,a,r)=>{\"use strict\";r.r(a),r.d(a,{default:()=>n});var t=r(5155),s=r(2115),c=r(5772),i=r(8129);r(7444);var d=r(6670),l=r(8500),o=r.",
+          "note": null,
+          "file": "output/45.94.157.75/js/_next_static_chunks_72.a8e31447ec05dbc4.js",
+          "domain": "45.94.157.75",
+          "file_count": 2
+        }
+      ]
+    },
+    "apis": {
+      "External API Call": [
+        {
+          "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/projects?sort=createdAt:desc&populate=*\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[72],{3072:(e,a,r)=>{\"use strict\";r.r(a),r.d(a,{default:()=>n});var t=r(5155),s=r(2115),c=r(5772),i=r(8129);r(7444);var d=r(6670),l=r(8500),o=r.",
+          "note": null,
+          "file": "output/45.94.157.75/js/_next_static_chunks_72.a8e31447ec05dbc4.js",
+          "domain": "45.94.157.75",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/competences?sort=createdAt:desc&populate=*\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+          "note": null,
+          "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+          "domain": "45.94.157.75",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/photo-reviews?sort=createdAt:desc&populate=image\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+          "note": null,
+          "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+          "domain": "45.94.157.75",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/reviews?sort=createdAt:desc&populate=*\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+          "note": null,
+          "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+          "domain": "45.94.157.75",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {}
+  }
+}

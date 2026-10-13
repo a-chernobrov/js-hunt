@@ -83,7 +83,7 @@
 
   /* ── STATS BAR ─────────────────────────────────────── */
   .stats-bar {
-    display: grid; grid-template-columns: repeat(6, 1fr);
+    display: grid; grid-template-columns: repeat(7, 1fr);
     border-bottom: 1px solid var(--border);
     background: var(--bg2);
   }
@@ -147,6 +147,7 @@
   .tab.active-secrets { border-color: var(--red); color: var(--red); background: var(--red-dim); }
   .tab.active-apis    { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
   .tab.active-sensitive { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+  .tab.active-sa      { border-color: var(--green); color: var(--green); background: rgba(48,200,112,.12); }
   .tab.active-all     { border-color: var(--border2); color: var(--text); background: var(--bg3); }
 
   .search-box {
@@ -195,6 +196,7 @@
   .finding-val.red    { color: var(--red); }
   .finding-val.yellow { color: var(--yellow); }
   .finding-val.cyan   { color: var(--cyan); }
+  .finding-val.green  { color: var(--green); }
   .finding-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .badge {
     font-size: 10px; padding: 2px 6px; border-radius: 2px;
@@ -317,6 +319,7 @@ function renderMeta() {
 function renderStats() {
   const counts = DATA.counts;
   const domainCount = DATA.domains;
+  const saCount = getServerActionsTotal();
   const s = document.getElementById('stats-bar');
   s.innerHTML = `
     <div class="stat"><div class="stat-label">Domains</div><div class="stat-val green">${domainCount}</div></div>
@@ -324,8 +327,53 @@ function renderStats() {
     <div class="stat"><div class="stat-label">Secrets</div><div class="stat-val red">${counts.secrets}</div></div>
     <div class="stat"><div class="stat-label">APIs</div><div class="stat-val yellow">${counts.apis}</div></div>
     <div class="stat"><div class="stat-label">Sensitive</div><div class="stat-val cyan">${counts.sensitive}</div></div>
-    <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${counts.secrets + counts.apis + counts.sensitive}</div></div>
+    <div class="stat"><div class="stat-label">Actions</div><div class="stat-val green">${saCount}</div></div>
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${counts.secrets + counts.apis + counts.sensitive + saCount}</div></div>
   `;
+}
+
+// ── SERVER ACTIONS ────────────────────────────────────────
+function getServerActionsTotal() {
+  const src = DATA.server_actions || {};
+  let n = 0;
+  for (const d in src) n += (src[d].count || (src[d].actions || []).length);
+  return n;
+}
+
+function getServerActionFindings() {
+  const src = DATA.server_actions || {};
+  const q = searchQ.toLowerCase();
+  const items = [];
+  for (const dom in src) {
+    if (activeDomain !== '__all__' && dom !== activeDomain) continue;
+    const info = src[dom] || {};
+    for (const a of (info.actions || [])) {
+      const mark = a.valid === true ? ' ✔' : (a.valid === false ? ' ✖' : '');
+      items.push({
+        value:   a.id || '',
+        context: a.context || '',
+        file:    a.file || '',
+        source:  (a.source || '') + mark,
+        domain:  dom,
+        line_no: 0,
+      });
+    }
+    for (const mod of (info.modules || [])) {
+      items.push({
+        value:   mod.file || '',
+        context: 'exports: ' + (mod.exports || []).join(', '),
+        file:    mod.file || '',
+        source:  'use server',
+        domain:  dom,
+        line_no: 0,
+      });
+    }
+  }
+  const filtered = items.filter(f =>
+    !q || (f.value||'').toLowerCase().includes(q) ||
+          (f.context||'').toLowerCase().includes(q) ||
+          (f.file||'').toLowerCase().includes(q));
+  return filtered.length ? {'Next.js Server Actions': filtered} : {};
 }
 
 // ── ALL FINDINGS flat with domain info ────────────────────
@@ -353,10 +401,15 @@ function getDomainsWithCounts() {
   for (const section of ['secrets','apis','sensitive']) {
     for (const cat in DATA[section]) {
       for (const f of DATA[section][cat]) {
-        if (!map[f.domain]) map[f.domain] = { secrets: 0, apis: 0, sensitive: 0 };
+        if (!map[f.domain]) map[f.domain] = { secrets: 0, apis: 0, sensitive: 0, server_actions: 0 };
         map[f.domain][section]++;
       }
     }
+  }
+  const sa = DATA.server_actions || {};
+  for (const dom in sa) {
+    if (!map[dom]) map[dom] = { secrets: 0, apis: 0, sensitive: 0, server_actions: 0 };
+    map[dom].server_actions = sa[dom].count || (sa[dom].actions || []).length;
   }
   return map;
 }
@@ -366,7 +419,7 @@ function renderSidebar() {
   const counts = getDomainsWithCounts();
   const domains = Object.keys(counts).sort();
   const totalSecrets = DATA.counts.secrets;
-  const totalAll = DATA.counts.secrets + DATA.counts.apis + DATA.counts.sensitive;
+  const totalAll = DATA.counts.secrets + DATA.counts.apis + DATA.counts.sensitive + getServerActionsTotal();
 
   let html = `<div class="sidebar-section">
     <div class="sidebar-title">Scope</div>
@@ -379,7 +432,7 @@ function renderSidebar() {
 
   for (const d of domains) {
     const c = counts[d];
-    const total = c.secrets + c.apis + c.sensitive;
+    const total = c.secrets + c.apis + c.sensitive + (c.server_actions || 0);
     const hasS = c.secrets > 0;
     html += `<button class="domain-btn ${hasS?'has-secrets':''} ${activeDomain===d?'active':''}"
       onclick="setDomain('${d}')" title="${d}">
@@ -420,18 +473,21 @@ function renderContent() {
     secrets:   (activeTab === 'all' || activeTab === 'secrets')   ? filterCat('secrets')   : {},
     apis:      (activeTab === 'all' || activeTab === 'apis')      ? filterCat('apis')      : {},
     sensitive: (activeTab === 'all' || activeTab === 'sensitive') ? filterCat('sensitive') : {},
+    sa:        (activeTab === 'all' || activeTab === 'sa')        ? getServerActionFindings() : {},
   };
 
   const sCount = Object.values(show.secrets).reduce((a,b)=>a+b.length,0);
   const aCount = Object.values(show.apis).reduce((a,b)=>a+b.length,0);
   const nCount = Object.values(show.sensitive).reduce((a,b)=>a+b.length,0);
-  const total  = sCount + aCount + nCount;
+  const saCount = Object.values(show.sa).reduce((a,b)=>a+b.length,0);
+  const total  = sCount + aCount + nCount + saCount;
 
   let html = `<div class="filter-tabs">
     <button class="tab ${activeTab==='all'?'active-all':''}" onclick="setTab('all')">All (${total})</button>
     <button class="tab ${activeTab==='secrets'?'active-secrets':''}" onclick="setTab('secrets')">🔴 Secrets (${sCount})</button>
     <button class="tab ${activeTab==='apis'?'active-apis':''}" onclick="setTab('apis')">🟡 API (${aCount})</button>
     <button class="tab ${activeTab==='sensitive'?'active-sensitive':''}" onclick="setTab('sensitive')">🔵 Sensitive (${nCount})</button>
+    <button class="tab ${activeTab==='sa'?'active-sa':''}" onclick="setTab('sa')">🟢 Actions (${saCount})</button>
     <input class="search-box" type="text" placeholder="filter..." value="${searchQ}"
       oninput="setSearch(this.value)">
   </div>`;
@@ -442,6 +498,7 @@ function renderContent() {
     if (sCount)   html += renderSection(show.secrets,   'secrets',   'red',    '#ff3b3b');
     if (aCount)   html += renderSection(show.apis,      'apis',      'yellow', '#f0c040');
     if (nCount)   html += renderSection(show.sensitive, 'sensitive', 'cyan',   '#30c8c8');
+    if (saCount)  html += renderSection(show.sa,        'sa',        'green',  '#30c870');
   }
 
   document.getElementById('content').innerHTML = html;
@@ -469,7 +526,7 @@ function renderSection(cats, section, colorClass, colorHex) {
           <div class="finding-val ${colorClass}">${escHtml(f.value)}</div>
           <div class="finding-meta">
             ${f.file_count > 1 ? `<span class="badge badge-files">${f.file_count}f</span>` : ''}
-            <span class="badge badge-line">L${f.line_no}</span>
+            <span class="badge badge-line">${f.source ? escHtml(f.source) : 'L'+f.line_no}</span>
           </div>
         </div>
         <div class="finding-detail">
@@ -483,7 +540,7 @@ function renderSection(cats, section, colorClass, colorHex) {
             <div class="detail-val">${escHtml(f.context)}</div>
           </div>
           <div class="detail-row">
-            <div class="detail-label">File · Line ${f.line_no}</div>
+            <div class="detail-label">${f.source ? 'Source' : 'File · Line ' + f.line_no}</div>
             <div class="detail-val">${escHtml(f.file)}</div>
           </div>
           <div class="detail-row">

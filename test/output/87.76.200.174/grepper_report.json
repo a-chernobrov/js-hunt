@@ -1,0 +1,30 @@
+{
+  "files_scanned": 15,
+  "size_mb": 0.524,
+  "secrets": {},
+  "apis": {
+    "Swagger/OpenAPI URL": [
+      {
+        "value": "\"/api-docs\"",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7323],{780:(e,t,i)=>{i.r(t),i.d(t,{default:()=>a});var r=i(5155);function a(e){let{email:t,className:i,children:a,onClick:l}=e;ret",
+        "note": null,
+        "file": "output/87.76.200.174/js/_next_static_chunks_7323-0dd9cf65281608fc.js",
+        "domain": "87.76.200.174",
+        "file_count": 1
+      }
+    ],
+    "REST Resource": [
+      {
+        "value": "\"/api/analytics/collect\"",
+        "line_no": 6,
+        "context": "`})]})}},7466:(e,t,r)=>{\"use strict\";r.d(t,{default:()=>i});var n=r(2115),a=r(6046);let l=\"rv_vid\";function i(){let e=(0,a.usePathname)(),t=(0,n.useRef)(null);return(0,n.useEffect)(()=>{var r;if(!e||(",
+        "note": null,
+        "file": "output/87.76.200.174/js/_next_static_chunks_app_layout-5aabbfb427dc0e7e.js",
+        "domain": "87.76.200.174",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {}
+}

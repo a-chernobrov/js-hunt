@@ -50,6 +50,7 @@ jsrecon grep --severity secrets --json
 4. **Source maps** — ищет `.map` файлы тремя способами: `sourceMappingURL`, HTTP заголовок `SourceMap:`, прямой перебор `{file}.map`; извлекает исходники
 5. **Next.js** — извлекает `buildId`, парсит `_buildManifest.js`, пробует `/_next/data/` эндпоинты
 6. **Vite** — детектирует dev/prod сборку, проверяет CVE-2025-30208 / CVE-2025-31125 / CVE-2025-31486, читает sensitive файлы через LFI
+7. **Server Actions** — собирает ID Next.js Server Actions всеми доступными способами: HTML/flight-данные, скачанные JS-чанки, восстановленные sources (`"use server"`-модули), `/_next/data`, манифесты (`server-reference-manifest.json`) и перечисление чанков из `app-build-manifest.json`; пишет `server_actions.json`
 
 ### Аргументы
 
@@ -67,6 +68,7 @@ jsrecon grep --severity secrets --json
 | `--proxy` | — | Прокси для брутфорса (напр. `socks5://127.0.0.1:9050`) |
 | `--brute-concurrency` | 20 | Параллельных запросов при брутфорсе |
 | `--brute-delay` | 0 | Задержка между запросами брутфорса (сек) |
+| `--probe-actions` | false | Активная проверка Server Action ID (POST + `Next-Action`; может выполнить action на сервере) |
 
 ### Структура вывода
 
@@ -82,6 +84,7 @@ output/
     next_data/            ← ответы /_next/data/ эндпоинтов
     vite_info.json        ← Vite: CVE результаты, payload, sep
     vite_lfi/             ← файлы прочитанные через LFI
+    server_actions.json   ← Next.js Server Actions: найденные action ID + источник
 ```
 
 ### Примеры
@@ -157,6 +160,7 @@ python3 grepper.py -j 16 --json
 - `apis` — API эндпоинты
 - `sensitive` — чувствительные пути
 - `vite` — результаты Vite CVE проверок с payload деталями и содержимым прочитанных файлов
+- `server_actions` — ID Next.js Server Actions по доменам (агрегация `server_actions.json`)
 
 ---
 
@@ -180,6 +184,46 @@ jsrecon full targets.txt \
   --json \
   --save-txt \
   -o /path/to/output
+```
+
+---
+
+## Server Actions
+
+Сбор ID Next.js Server Actions (`$ACTION_ID_…`, `createServerReference("…")`, `registerServerReference("…")`)
+из всех доступных источников. Каждый источник фиксируется в поле `methods`.
+
+| Метод | Источник |
+|-------|----------|
+| `html` | отрендеренный DOM + flight-данные (`__next_f`) |
+| `js` | скачанные клиентские чанки |
+| `sources` | восстановленные из sourcemaps исходники + модули с директивой `"use server"` (и их экспорты) |
+| `next_data` | ответы `/_next/data/` |
+| `manifest` | `/_next/static/<build>/server-reference-manifest.json` (если отдаётся) |
+| `chunk_enum` | перечисление и скачивание чанков из `app-build-manifest.json` (до 80) |
+| `probe` | активная проверка POST + `Next-Action` (только с `--probe-actions`) |
+
+Также фиксируются неидентифицирующие маркеры (`signals`): `$ACTION_REF_`, `createFormAction`,
+`decodeAction`, `decodeFormState`, `"Next-Action"`, `server-reference-manifest`, `"use server"`, `__next_f`.
+
+Результат в `server_actions.json`:
+```json
+{
+  "base_url": "https://target.com",
+  "build_id": "abc123",
+  "detected": true,
+  "count": 3,
+  "methods": { "html": 1, "js": 2 },
+  "signals": { "use server directive": 1 },
+  "manifests": [],
+  "modules": [ { "file": "sources/app/actions.ts", "exports": ["saveUser"] } ],
+  "probes": [],
+  "actions": [
+    { "id": "0123456789abcdef0123456789abcdef01234567",
+      "source": "js", "file": "js/_next_static_chunks_app_page.js",
+      "pattern": "createServerReference", "context": "…createServerReference(\"0123…\")…" }
+  ]
+}
 ```
 
 ---

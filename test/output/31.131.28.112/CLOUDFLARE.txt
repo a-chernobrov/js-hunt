@@ -1,0 +1,4 @@
+Cloudflare detected on https://31.131.28.112
+JS files collected: 21
+Brute: skipped
+Manual review needed: visit https://31.131.28.112 in browser and check JS manually

@@ -1,0 +1,150 @@
+{
+  "domain": "https://185.65.244.157",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://185.65.244.157/_next/static/__fZqIMCM4_-THwWltbhL/_buildManifest.js",
+    "https://185.65.244.157/_next/static/__fZqIMCM4_-THwWltbhL/_ssgManifest.js",
+    "https://185.65.244.157/_next/static/chunks/1276-6815c4e49c66827c.js",
+    "https://185.65.244.157/_next/static/chunks/4240-b179b285bcc1c61a.js",
+    "https://185.65.244.157/_next/static/chunks/4729-c6a5f43228966907.js",
+    "https://185.65.244.157/_next/static/chunks/7536-58e2df5d5c205660.js",
+    "https://185.65.244.157/_next/static/chunks/7943-182e3475acef6c11.js",
+    "https://185.65.244.157/_next/static/chunks/framework-314c182fa7e2bf37.js",
+    "https://185.65.244.157/_next/static/chunks/main-8443045f629527e3.js",
+    "https://185.65.244.157/_next/static/chunks/pages/_app-766f96f0a866b9f3.js",
+    "https://185.65.244.157/_next/static/chunks/pages/index-058123e17c900152.js",
+    "https://185.65.244.157/_next/static/chunks/pages/login-38eac4b7d2f651b1.js",
+    "https://185.65.244.157/_next/static/chunks/pages/recover-password-341707f6abe42047.js",
+    "https://185.65.244.157/_next/static/chunks/pages/register/%5B%5B...option%5D%5D-a2ff195f411fd186.js",
+    "https://185.65.244.157/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js",
+    "https://185.65.244.157/_next/static/chunks/webpack-2a0ecb72bd12fbe3.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": {
+    "build_id": "__fZqIMCM4_-THwWltbhL",
+    "source": "page",
+    "manifest": "wordlist_brute",
+    "base_url": "https://185.65.244.157",
+    "data_base": "https://185.65.244.157/_next/data/__fZqIMCM4_-THwWltbhL/",
+    "manifest_url": "https://185.65.244.157/_next/static/__fZqIMCM4_-THwWltbhL/_buildManifest.js",
+    "routes": []
+  },
+  "server_actions": {
+    "base_url": "https://185.65.244.157",
+    "build_id": "__fZqIMCM4_-THwWltbhL",
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "server-reference-manifest": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 16,
+    "js_playwright": 16,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": true,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 1,
+    "sensitive_count": 5
+  },
+  "grepper": {
+    "files_scanned": 16,
+    "size_mb": 0.683,
+    "secrets": {},
+    "apis": {
+      "GraphQL Query/Mutation": [
+        {
+          "value": "query values (",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[179],{84878:function(e,t){\"use strict\";function r(){return\"\"}Object.defineProperty(t,\"__esModule\",{value:!0}),Object.defineProperty(t,\"getDeplo",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static_chunks_main-8443045f629527e3.js",
+          "domain": "185.65.244.157",
+          "file_count": 7
+        }
+      ]
+    },
+    "sensitive": {
+      "Auth Endpoints": [
+        {
+          "value": "\"/register/",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[5373],{60099:function(e,t,r){\"use strict\";var a,s=r(67294);function l(){return(l=Object.assign?Object.assign.bind():function(e){for(var t=1;t<a",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static_chunks_pages_register_%5B%5B...option%5D%5D-a2ff195f411fd186.js",
+          "domain": "185.65.244.157",
+          "file_count": 2
+        },
+        {
+          "value": "\"/register\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[3459],{71970:function(e,t,r){\"use strict\";var s,a=r(67294);function l(){return(l=Object.assign?Object.assign.bind():function(e){for(var t=1;t<a",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static_chunks_pages_login-38eac4b7d2f651b1.js",
+          "domain": "185.65.244.157",
+          "file_count": 8
+        }
+      ],
+      "Config/Env": [
+        {
+          "value": "\"/settings\"",
+          "line_no": 1,
+          "context": "self.__BUILD_MANIFEST=function(s,c,a,t,e,i,n,d,u,r,o,f,k,g,h,j,p,b,l,v,_,w,m,I,B,F,A){return{__rewrites:{afterFiles:[],beforeFiles:[],fallback:[]},\"/\":[\"static/chunks/pages/index-058123e17c900152.js\"]",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static___fZqIMCM4_-THwWltbhL__buildManifest.js",
+          "domain": "185.65.244.157",
+          "file_count": 3
+        }
+      ],
+      "Webhook/Callback": [
+        {
+          "value": "\"/notification\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[2888],{92547:function(e,t,r){\"use strict\";var n,o=r(67294);function i(){return(i=Object.assign?Object.assign.bind():function(e){for(var t=1;t<a",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static_chunks_pages__app-766f96f0a866b9f3.js",
+          "domain": "185.65.244.157",
+          "file_count": 1
+        },
+        {
+          "value": "\"/notification/",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[2888],{92547:function(e,t,r){\"use strict\";var n,o=r(67294);function i(){return(i=Object.assign?Object.assign.bind():function(e){for(var t=1;t<a",
+          "note": null,
+          "file": "output/185.65.244.157/js/_next_static_chunks_pages__app-766f96f0a866b9f3.js",
+          "domain": "185.65.244.157",
+          "file_count": 1
+        }
+      ]
+    }
+  }
+}

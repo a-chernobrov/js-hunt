@@ -1,0 +1,186 @@
+{
+  "files_scanned": 8,
+  "size_mb": 1.537,
+  "secrets": {},
+  "apis": {
+    "HTTP Method + Route": [
+      {
+        "value": "get(\"/sellers\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/users/personal-account/orders\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "get(\"/users/personal-account/orders/\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "put(\"/users/personal-account/orders/\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/auth/external\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/auth/send-code\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/auth/sign-in\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/auth/logout\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/auth/sign-up\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/verification/send-code\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "get(\"/users/info\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "get(\"/users/personal-account\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "put(\"/users/personal-account\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/files/\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "get(\"/users/personal-account/orders\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "post(\"/users/personal-account/verify-code\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      },
+      {
+        "value": "put(\"/users/personal-account/verify\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {
+    "Auth Endpoints": [
+      {
+        "value": "\"/logout?",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      }
+    ],
+    "Upload/File": [
+      {
+        "value": "\"/files/",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[888,741],{3867:function(e,t,n){\"use strict\";n.d(t,{A:function(){return P},B:function(){return m},C:function(){return N},D:function(){return b},",
+        "note": null,
+        "file": "output/62.149.1.195/js/_next_static_chunks_pages__app-ac531d4bc940df9d.js",
+        "domain": "62.149.1.195",
+        "file_count": 1
+      }
+    ]
+  }
+}

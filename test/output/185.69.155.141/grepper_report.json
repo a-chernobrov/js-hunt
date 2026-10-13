@@ -1,0 +1,296 @@
+{
+  "files_scanned": 26,
+  "size_mb": 1.97,
+  "secrets": {
+    "Password Assignment": [
+      {
+        "value": "PASSWORD:\"wrong-password\"",
+        "line_no": 91,
+        "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "PASSWORD:\"missing-password\"",
+        "line_no": 91,
+        "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ],
+    "Generic API Key": [
+      {
+        "value": "apiKey:this.auth.config.apiKey",
+        "line_no": 226,
+        "context": "*/function Y(e,t){v(\"string\"==typeof e||void 0===e,\"internal-error\",{appName:t})}class X{constructor(e){var{uid:t,auth:i,stsTokenManager:n}=e,r=(0,o._T)(e,[\"uid\",\"auth\",\"stsTokenManager\"]);this.provid",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "apiKey:this.config.apiKey",
+        "line_no": 346,
+        "context": "*/class ev{constructor(e,t,i,n){this.app=e,this.heartbeatServiceProvider=t,this.appCheckServiceProvider=i,this.config=n,this.currentUser=null,this.emulatorConfig=null,this.operations=Promise.resolve()",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "apiKey:\"AIzaSyBd8pbVAZjIawx4kfLm-LTMQeMC-9H8ZkI",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ],
+    "Google API Key": [
+      {
+        "value": "AIzaSyBd8pbVAZjIawx4kfLm-LTMQeMC-9H8ZkI",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+        "note": "public?",
+        "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ]
+  },
+  "apis": {
+    "API Route v1/v2/v3": [
+      {
+        "value": "\"/v2/recaptchaConfig\"",
+        "line_no": 91,
+        "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:delete\"",
+        "line_no": 106,
+        "context": "*/async function U(e,t){return P(e,\"POST\",\"/v1/accounts:delete\",t)}async function V(e,t){return P(e,\"POST\",\"/v1/accounts:lookup\",t)}/**",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:lookup\"",
+        "line_no": 106,
+        "context": "*/async function U(e,t){return P(e,\"POST\",\"/v1/accounts:delete\",t)}async function V(e,t){return P(e,\"POST\",\"/v1/accounts:lookup\",t)}/**",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/token\"",
+        "line_no": 196,
+        "context": "*/async function G(e,t){let i=await O(e,{},async()=>{let i=(0,r.xO)({grant_type:\"refresh_token\",refresh_token:t}).slice(1),{tokenApiHost:n,apiKey:s}=e.config,a=b(e,n,\"/v1/token\",`key=${s}`),o=await e.",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/accounts:revokeToken\"",
+        "line_no": 196,
+        "context": "*/async function G(e,t){let i=await O(e,{},async()=>{let i=(0,r.xO)({grant_type:\"refresh_token\",refresh_token:t}).slice(1),{tokenApiHost:n,apiKey:s}=e.config,a=b(e,n,\"/v1/token\",`key=${s}`),o=await e.",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/passwordPolicy\"",
+        "line_no": 331,
+        "context": "*/async function em(e,t={}){return P(e,\"GET\",\"/v2/passwordPolicy\",R(e,t))}class eg{constructor(e){var t,i,n,r;let s=e.customStrengthOptions;this.customStrengthOptions={},this.customStrengthOptions.min",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:signUp\"",
+        "line_no": 361,
+        "context": "*/class eP{constructor(e,t){this.providerId=e,this.signInMethod=t}toJSON(){return _(\"not implemented\")}_getIdTokenResponse(e){return _(\"not implemented\")}_linkToIdToken(e,t){return _(\"not implemented\"",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:signInWithPassword\"",
+        "line_no": 376,
+        "context": "*/async function eC(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPassword\",R(e,t))}async function eb(e,t){return P(e,\"POST\",\"/v1/accounts:sendOobCode\",R(e,t))}async function eN(e,t){return eb(e,t)}a",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:sendOobCode\"",
+        "line_no": 376,
+        "context": "*/async function eC(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPassword\",R(e,t))}async function eb(e,t){return P(e,\"POST\",\"/v1/accounts:sendOobCode\",R(e,t))}async function eN(e,t){return eb(e,t)}a",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:signInWithEmailLink\"",
+        "line_no": 391,
+        "context": "*/async function eL(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithEmailLink\",R(e,t))}async function eD(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithEmailLink\",R(e,t))}/**",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:signInWithIdp\"",
+        "line_no": 421,
+        "context": "*/async function eU(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithIdp\",R(e,t))}class eV extends eP{constructor(){super(...arguments),this.pendingToken=null}static _fromParams(e){let t=new eV(e.provid",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:sendVerificationCode\"",
+        "line_no": 436,
+        "context": "*/async function ex(e,t){return P(e,\"POST\",\"/v1/accounts:sendVerificationCode\",R(e,t))}async function eF(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPhoneNumber\",R(e,t))}async function ej(e,t){let ",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/accounts:signInWithPhoneNumber\"",
+        "line_no": 436,
+        "context": "*/async function ex(e,t){return P(e,\"POST\",\"/v1/accounts:sendVerificationCode\",R(e,t))}async function eF(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPhoneNumber\",R(e,t))}async function ej(e,t){let ",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/accounts/mfaEnrollment:start\"",
+        "line_no": 811,
+        "context": "*/let tm=\"firebaseLocalStorageDb\",tg=\"firebaseLocalStorage\",tv=\"fbase_key\";class t_{constructor(e){this.request=e}toPromise(){return new Promise((e,t)=>{this.request.addEventListener(\"success\",()=>{e(",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/accounts/mfaSignIn:start\"",
+        "line_no": 811,
+        "context": "*/let tm=\"firebaseLocalStorageDb\",tg=\"firebaseLocalStorage\",tv=\"fbase_key\";class t_{constructor(e){this.request=e}toPromise(){return new Promise((e,t)=>{this.request.addEventListener(\"success\",()=>{e(",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v1/projects\"",
+        "line_no": 901,
+        "context": "*/async function t$(e,t={}){return P(e,\"GET\",\"/v1/projects\",t)}/**",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/accounts/mfaEnrollment:finalize\"",
+        "line_no": 961,
+        "context": "*/let t5=\"webStorageSupport\";class t9{constructor(){this.eventManagers={},this.iframes={},this.originValidationPromises={},this._redirectPersistence=tl,this._completeRedirectFn=tj,this._overrideRedire",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/v2/accounts/mfaSignIn:finalize\"",
+        "line_no": 961,
+        "context": "*/let t5=\"webStorageSupport\";class t9{constructor(){this.eventManagers={},this.iframes={},this.originValidationPromises={},this._redirectPersistence=tl,this._completeRedirectFn=tj,this._overrideRedire",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ],
+    "Template Literal API": [
+      {
+        "value": "`${i}/JsCore/",
+        "line_no": 301,
+        "context": "*/function ep(e,t=[]){let i;switch(e){case\"Browser\":i=en((0,r.z$)());break;case\"Worker\":i=`${en((0,r.z$)())}-${e}`;break;default:i=e}let n=t.length?t.join(\",\"):\"FirebaseCore-web\";return`${i}/JsCore/${",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "`${this.mo}/v1/",
+        "line_no": 1054,
+        "context": "*/let rY=\"WebChannelConnection\";class rX extends class{constructor(e){this.databaseInfo=e,this.databaseId=e.databaseId;let t=e.ssl?\"https\":\"http\",r=encodeURIComponent(this.databaseId.projectId),n=enco",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_bc9e92e6-e45e76c03fb7de52.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ],
+    "HTTP Method + Route": [
+      {
+        "value": "patch(\"/settings/users/\"",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7114],{55963:function(e,t,n){n.d(t,{Z:function(){return p}});var r=n(57437),o=n(2265),a=n(25577),i=n(50110),l=n(35843),c=n(89975);",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7114-cf2be8ed72d6f116.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {
+    "Config/Env": [
+      {
+        "value": "\"/settings/",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7114],{55963:function(e,t,n){n.d(t,{Z:function(){return p}});var r=n(57437),o=n(2265),a=n(25577),i=n(50110),l=n(35843),c=n(89975);",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_7114-cf2be8ed72d6f116.js",
+        "domain": "185.69.155.141",
+        "file_count": 3
+      }
+    ],
+    "Monitoring": [
+      {
+        "value": "\"/monitoring\"",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      },
+      {
+        "value": "\"/monitoring/",
+        "line_no": 1,
+        "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+        "note": null,
+        "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+        "domain": "185.69.155.141",
+        "file_count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "files_scanned": 21,
+  "size_mb": 1.073,
+  "secrets": {
+    "Telegram Bot Token": [
+      {
+        "value": "8032121665:AAHvAK2k1VgoOSFwTdTOWEr7u9xCPB9XTwg",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[244],{1257:function(e,a,t){\"use strict\";t.d(a,{Z:function(){return Z}});var n=t(6265),o=t(7294),r=t(1664),c=t(1163),l=o.createElement,i=functio",
+        "note": null,
+        "file": "output/31.131.28.112/js/_next_static_chunks_pages_vacancies-3096c7629a1a426f6872.js",
+        "domain": "31.131.28.112",
+        "file_count": 2
+      }
+    ]
+  },
+  "apis": {},
+  "sensitive": {}
+}

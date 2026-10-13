@@ -1,0 +1,67 @@
+{
+  "files_scanned": 12,
+  "size_mb": 0.782,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/users/me\"",
+        "line_no": 3,
+        "context": "Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpatterns`),\"__NEXT_ERROR_CODE\",{value:\"E871\",enumerable:!1,configurable:!0});let s=(0,n.findClosestQuality)(i,e);return`${e.pat",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0a~skda8ih2mn.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/users/login\"",
+        "line_no": 3,
+        "context": "Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpatterns`),\"__NEXT_ERROR_CODE\",{value:\"E871\",enumerable:!1,configurable:!0});let s=(0,n.findClosestQuality)(i,e);return`${e.pat",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0a~skda8ih2mn.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/ranks\"",
+        "line_no": 3,
+        "context": "Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpatterns`),\"__NEXT_ERROR_CODE\",{value:\"E871\",enumerable:!1,configurable:!0});let s=(0,n.findClosestQuality)(i,e);return`${e.pat",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0a~skda8ih2mn.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/site-settings\"",
+        "line_no": 3,
+        "context": "Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpatterns`),\"__NEXT_ERROR_CODE\",{value:\"E871\",enumerable:!1,configurable:!0});let s=(0,n.findClosestQuality)(i,e);return`${e.pat",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0a~skda8ih2mn.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/community-progress\"",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,715110,e=>{e.q(\"/_next/static/media/brilliant.02b.8o2e3zgr0.png\")},14569,e=>{e.q(\"/_next",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0gx5vdmbbcnw4.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {
+    "PHP Endpoint": [
+      {
+        "value": "\"https://tournamentservice.net/tournament.php?participants=54781\"",
+        "line_no": 3,
+        "context": "Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpatterns`),\"__NEXT_ERROR_CODE\",{value:\"E871\",enumerable:!1,configurable:!0});let s=(0,n.findClosestQuality)(i,e);return`${e.pat",
+        "note": null,
+        "file": "output/31.131.17.133/js/_next_static_chunks_0a~skda8ih2mn.js",
+        "domain": "31.131.17.133",
+        "file_count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "domain": "https://87.76.207.9",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://87.76.207.9/_next/static/chunks/03~yq9q893hmn.js",
+    "https://87.76.207.9/_next/static/chunks/0cnue.hgcr0wa.js",
+    "https://87.76.207.9/_next/static/chunks/0d3shmwh5_nmn.js",
+    "https://87.76.207.9/_next/static/chunks/0iv4x36tmyekv.js",
+    "https://87.76.207.9/_next/static/chunks/0pqt~8bl3ukh4.js",
+    "https://87.76.207.9/_next/static/chunks/0yoanpjmpk3nm.js",
+    "https://87.76.207.9/_next/static/chunks/0zmod9-v9rjog.js",
+    "https://87.76.207.9/_next/static/chunks/100_79xbsmo7i.js",
+    "https://87.76.207.9/_next/static/chunks/13i1g~d8df-r7.js",
+    "https://87.76.207.9/_next/static/chunks/turbopack-0t.w.2j7.isiv.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://87.76.207.9",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 10,
+    "js_playwright": 10,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 2,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 10,
+    "size_mb": 0.644,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/iletisim\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,84614,63488,43432,86311,69638,31278,e=>{\"use strict\";var a=e.i(75254);let s=(0,a.default",
+          "note": null,
+          "file": "output/87.76.207.9/js/_next_static_chunks_13i1g~d8df-r7.js",
+          "domain": "87.76.207.9",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/randevu\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,84614,63488,43432,86311,69638,31278,e=>{\"use strict\";var a=e.i(75254);let l=(0,a.default",
+          "note": null,
+          "file": "output/87.76.207.9/js/_next_static_chunks_0yoanpjmpk3nm.js",
+          "domain": "87.76.207.9",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {}
+  }
+}

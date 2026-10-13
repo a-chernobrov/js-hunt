@@ -194,6 +194,87 @@ def is_obvious_js(url: str) -> bool:
     return stem in obvious or any(stem.startswith(o) for o in obvious)
 
 
+# ─── Next.js Server Actions ──────────────────────────────────────────────────
+# Server Actions are invoked from the client by an opaque action id. Detection
+# methods (see process_server_actions):
+#   html        — rendered DOM + flight data (Playwright)
+#   js          — downloaded client chunks
+#   sources     — sourcemap-restored sources ("use server" modules)
+#   next_data   — /_next/data flight responses
+#   manifest    — /_next/static/<build>/server-reference-manifest.json
+#   chunk_enum  — chunks enumerated from app-build-manifest.json
+#   probe       — active confirmation via POST + Next-Action header (opt-in)
+#
+# Client markers:
+#   "$ACTION_ID_<id>"                 — form / flight-data reference
+#   createServerReference("<id>")     — client reference in the JS runtime
+#   registerServerReference("<id>")   — client reference with bound args
+SERVER_ACTION_ID_PATTERNS = [
+    ("$ACTION_ID_",             re.compile(r"\$ACTION_ID_([A-Za-z0-9_\-]{16,80})")),
+    ("createServerReference",   re.compile(r"""createServerReference[^\w$]{0,6}\(?["']([A-Za-z0-9_\-]{16,80})["']""")),
+    ("registerServerReference", re.compile(r"""registerServerReference[^\w$]{0,6}\(?["']([A-Za-z0-9_\-]{16,80})["']""")),
+]
+
+# Non-identifying markers — their presence proves the bundle contains SR plumbing
+SERVER_ACTION_SIGNAL_PATTERNS = {
+    "$ACTION_REF_":              re.compile(r"\$\$?ACTION_REF_\d+"),
+    "createFormAction":          re.compile(r"createFormAction"),
+    "decodeAction":              re.compile(r"decodeAction"),
+    "decodeFormState":           re.compile(r"decodeFormState"),
+    "next-action header":        re.compile(r"(?i)['\"]next-action['\"]"),
+    "server-reference-manifest": re.compile(r"server-reference-manifest"),
+    "use server directive":      re.compile(r"""["']use server["']"""),
+    "flight data __next_f":      re.compile(r"__next_f"),
+}
+
+USE_SERVER_RE   = re.compile(r"""^\s*(?:(?://[^\n]*|/\*.*?\*/)\s*)*["']use server["']""", re.S)
+EXPORT_FN_RE    = re.compile(r"export\s+(?:default\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)")
+EXPORT_NAMED_RE = re.compile(r"export\s*\{([^}]*)\}")
+
+
+def _extract_use_server_module(text: str) -> dict | None:
+    """Return exported names if the source file is a `"use server"` action module."""
+    if not USE_SERVER_RE.match(text[:2000]):
+        return None
+    exports = set(EXPORT_FN_RE.findall(text))
+    for block in EXPORT_NAMED_RE.findall(text):
+        for part in block.split(","):
+            name = part.strip().split(" as ")[-1].strip()
+            if name and name != "default":
+                exports.add(name)
+    return {"exports": sorted(exports)}
+
+
+def _scan_server_actions_text(text: str, source: str, label: str, into: dict,
+                              signals: dict | None = None, modules: dict | None = None) -> int:
+    """Extract Server Action IDs / markers from a text blob into `into` (id → record)."""
+    found = 0
+    for name, pattern in SERVER_ACTION_ID_PATTERNS:
+        for m in pattern.finditer(text):
+            action_id = m.group(1)
+            if action_id in into:
+                continue
+            snippet = text[max(0, m.start() - 40): m.end() + 40].replace("\n", " ").strip()
+            into[action_id] = {
+                "id":      action_id,
+                "source":  source,   # html | js | sources | next_data | manifest | chunk_enum
+                "file":    label,
+                "pattern": name,
+                "context": snippet[:200],
+            }
+            found += 1
+    if signals is not None:
+        for name, pattern in SERVER_ACTION_SIGNAL_PATTERNS.items():
+            if pattern.search(text):
+                signals[name] = signals.get(name, 0) + 1
+    if modules is not None and source == "sources":
+        mod = _extract_use_server_module(text)
+        if mod:
+            modules[label] = mod
+    return found
+
+
+
 # ─── Stage 1: Playwright JS collection ───────────────────────────────────────
 # Runs in a separate process via ProcessPoolExecutor to prevent event loop blocking
 
@@ -206,7 +287,7 @@ def _playwright_worker(
 ) -> tuple[list[str], str | None, dict, bool, bool]:
     """
     Sync Playwright worker — runs in a subprocess.
-    Returns (js_urls, build_id, cookies, is_cloudflare, page_loaded).
+    Returns (js_urls, build_id, cookies, is_cloudflare, page_loaded, server_actions).
     """
     import asyncio
     import traceback
@@ -217,6 +298,7 @@ def _playwright_worker(
     js_urls: list[str] = []
     page_build_id: str | None = None
     page_loaded = False
+    page_actions: list = []
 
     pw_headers = {"Accept-Language": "en-US,en;q=0.9"}
     pw_ua = UA
@@ -311,6 +393,14 @@ def _playwright_worker(
                         js_urls.append(s)
         except Exception:
             pass
+
+        # Extract Next.js Server Action IDs from the rendered HTML / flight data
+        try:
+            _seen_actions: dict = {}
+            _scan_server_actions_text(page.content(), "html", "index.html", _seen_actions)
+            page_actions = list(_seen_actions.values())
+        except Exception:
+            page_actions = []
 
         def _collect_html_scripts():
             try:
@@ -495,7 +585,7 @@ def _playwright_worker(
                 except Exception:
                     pass
 
-    return js_urls, page_build_id, session_cookies, is_cloudflare, page_loaded
+    return js_urls, page_build_id, session_cookies, is_cloudflare, page_loaded, page_actions
 
 
 async def collect_js_playwright(
@@ -505,7 +595,7 @@ async def collect_js_playwright(
     executor=None,
     crawl_mode: str = "none",
     crawl_depth: int = 10,
-) -> tuple[list[str], str | None]:
+) -> tuple[list[str], str | None, dict, bool, bool, list]:
     """
     Async wrapper — runs _playwright_worker in a separate process.
     Runs the synchronous worker with a bounded wait.
@@ -525,10 +615,10 @@ async def collect_js_playwright(
     except asyncio.TimeoutError:
         _debug_event("C", "Playwright timeout", {"url": url, "crawl_mode": crawl_mode, "timeout": hard_timeout})
         _hit(f"Playwright hard-timeout ({hard_timeout}s) — попробуй увеличить -t/--timeout или отключить --crawl")
-        return [], None, {}, False, False
+        return [], None, {}, False, False, []
     except Exception:
         _debug_event("B", "Playwright collection exception", {"url": url, "crawl_mode": crawl_mode})
-        return [], None, {}, False, False
+        return [], None, {}, False, False, []
 
 
 # ─── Stage 2: Brute-force sibling JS files ───────────────────────────────────
@@ -695,6 +785,7 @@ def save_domain_report(
       - sourcemaps          : .map files downloaded
       - vite                : vite_info.json contents if present
       - nextjs              : next_info.json contents if present
+      - server_actions      : Next.js Server Action IDs (server_actions.json)
       - cloudflare          : bool
     """
     report: dict = {
@@ -707,20 +798,21 @@ def save_domain_report(
         "sourcemaps":          [],
         "vite":                None,
         "nextjs":              None,
+        "server_actions":      {"detected": False, "count": 0, "actions": []},
     }
 
-    # Collected source files from sourcemap extraction
+    # Collected source files from sourcemap extraction (absolute paths)
     sources_dir = domain_dir / "sources"
     if sources_dir.exists():
         report["sources"] = sorted(
-            str(p.relative_to(sources_dir)) for p in sources_dir.rglob("*") if p.is_file()
+            str(p.resolve()) for p in sources_dir.rglob("*") if p.is_file()
         )
 
-    # Downloaded .map files
+    # Downloaded .map files (absolute paths)
     sourcemaps_dir = domain_dir / "sourcemaps"
     if sourcemaps_dir.exists():
         report["sourcemaps"] = sorted(
-            str(p.relative_to(sourcemaps_dir)) for p in sourcemaps_dir.rglob("*.map")
+            str(p.resolve()) for p in sourcemaps_dir.rglob("*.map")
         )
 
     # Vite info (root path + CVE results + LFI files)
@@ -736,6 +828,14 @@ def save_domain_report(
     if next_json.exists():
         try:
             report["nextjs"] = json.loads(next_json.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    # Next.js Server Actions
+    sa_json = domain_dir / "server_actions.json"
+    if sa_json.exists():
+        try:
+            report["server_actions"] = json.loads(sa_json.read_text(encoding="utf-8"))
         except Exception:
             pass
 
@@ -761,6 +861,9 @@ def save_domain_report(
         "vite_lfi_count":  len(report["vite"]["lfi_files"]) if report["vite"] else 0,
         "has_nextjs":      report["nextjs"] is not None,
         "nextjs_routes":   len(report["nextjs"]["routes"]) if report["nextjs"] else 0,
+        "has_server_actions":   bool(report["server_actions"].get("detected")),
+        "server_actions_count": report["server_actions"].get("count", 0),
+        "server_actions_methods": report["server_actions"].get("methods", {}),
         "cloudflare":      report["cloudflare"],
         # grepper counts filled in by grepper.py after it runs
         "secrets_count":   0,
@@ -1002,6 +1105,7 @@ async def process_subdomain(
     pw_executor=None,
     crawl_mode: str = "none",
     crawl_depth: int = 10,
+    probe_actions: bool = False,
 ):
     url = normalize(raw)
     if not url:
@@ -1015,7 +1119,7 @@ async def process_subdomain(
 
         # Stage 1 — collect JS via headless browser
         try:
-            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded = await collect_js_playwright(
+            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded, page_actions = await collect_js_playwright(
                 url, timeout=timeout, custom_headers=custom_headers,
                 executor=pw_executor,
                 crawl_mode=crawl_mode,
@@ -1023,7 +1127,7 @@ async def process_subdomain(
             )
         except Exception as e:
             print(f"{_pfx()}{_c(_C_RED, "[!]")} Playwright error: {e}", file=sys.stderr)
-            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded = [], None, {}, False, False
+            js_urls, page_build_id, pw_cookies, is_cloudflare, page_loaded, page_actions = [], None, {}, False, False, []
 
         if is_cloudflare:
             print(f"{_pfx()}{_c(_C_YELLOW, "[cf]")} Cloudflare detected — brute disabled, using browser cookies for downloads")
@@ -1120,6 +1224,24 @@ async def process_subdomain(
                     await process_vite(url, target_js + bruted, output_dir / slug, client)
             except asyncio.TimeoutError:
                 print(f"{_pfx()}{_c(_C_YELLOW, '[vite] timeout — skipping')}")
+
+            # ── Next.js Server Actions (html + js + sources + manifests) ─────
+            try:
+                async with asyncio.timeout(180):
+                    sa_info = await process_server_actions(
+                        domain_dir   = output_dir / slug,
+                        base_url     = url,
+                        client       = client,
+                        page_actions = page_actions,
+                        build_id     = page_build_id,
+                        probe        = probe_actions,
+                    )
+                if sa_info["detected"]:
+                    _ok(f"Server Actions: {_c(_C_GREEN, str(sa_info['count']))} action id(s) "
+                        f"{_c(_C_DIM, '(' + ', '.join(f'{k}:{v}' for k, v in sa_info['methods'].items() if v) + ')')} "
+                        f"→ {_c(_C_DIM, str(output_dir / slug / 'server_actions.json'))}")
+            except asyncio.TimeoutError:
+                print(f"{_pfx()}{_c(_C_YELLOW, '[actions] timeout — skipping')}")
 
         # ── Aggregate all results into a single domain_report.json ───────────
         report_path = save_domain_report(
@@ -1596,6 +1718,205 @@ async def process_nextjs(base_url: str, js_urls: list[str],
     await probe_next_data(base_url, build_id, routes, domain_dir, client)
 
 
+MANIFEST_PATHS = [
+    "/_next/static/{bid}/server-reference-manifest.json",
+    "/_next/static/{bid}/app-build-manifest.json",
+    "/server-reference-manifest.json",
+]
+MANIFEST_CHUNK_LIMIT = 80
+
+
+async def _fetch_next_manifests(base_url: str, build_id: str | None, client) -> dict:
+    """Try to download Next.js server-reference / app-build manifests (usually not served)."""
+    found: dict[str, dict] = {}
+    for tpl in MANIFEST_PATHS:
+        if "{bid}" in tpl and not build_id:
+            continue
+        url = base_url.rstrip("/") + (tpl.format(bid=build_id) if "{bid}" in tpl else tpl)
+        try:
+            r = await client.get(url, timeout=_T_FAST, follow_redirects=True)
+            if r.status_code != 200 or "json" not in r.headers.get("content-type", ""):
+                continue
+            data = r.json()
+            if isinstance(data, dict):
+                found[url] = data
+        except Exception:
+            continue
+    return found
+
+
+def _scan_server_reference_manifest(url: str, data: dict, into: dict) -> int:
+    """Extract action ids from server-reference-manifest.json ({node:{id:{...}}, edge:{...}})."""
+    n = 0
+    for layer, entries in (data or {}).items():
+        if layer not in ("node", "edge", "middleware") or not isinstance(entries, dict):
+            continue
+        for action_id in entries.keys():
+            if re.fullmatch(r"[A-Za-z0-9_\-]{16,80}", action_id or "") and action_id not in into:
+                into[action_id] = {
+                    "id": action_id, "source": "manifest", "file": url,
+                    "pattern": "server-reference-manifest", "context": layer,
+                }
+                n += 1
+    return n
+
+
+async def _enum_and_scan_chunks(base_url: str, manifest: dict, into: dict,
+                                signals: dict, client) -> int:
+    """Fetch every JS chunk listed in app-build-manifest.json and scan it."""
+    files: set = set()
+    if isinstance(manifest, dict):
+        for chunk_list in (manifest.get("pages") or {}).values():
+            if isinstance(chunk_list, list):
+                files.update(c for c in chunk_list if isinstance(c, str))
+        files.update(c for c in (manifest.get("rootMainFiles") or []) if isinstance(c, str))
+    files = sorted(f for f in files if f.endswith(".js"))[:MANIFEST_CHUNK_LIMIT]
+    if not files:
+        return 0
+
+    base = base_url.rstrip("/") + "/_next/"
+    sem = asyncio.Semaphore(10)
+
+    async def one(chunk: str):
+        async with sem:
+            try:
+                r = await client.get(base + chunk.lstrip("/"), timeout=_T_NORMAL, follow_redirects=True)
+                if r.status_code == 200:
+                    _scan_server_actions_text(r.text, "chunk_enum", chunk, into, signals)
+            except Exception:
+                pass
+
+    await asyncio.gather(*[one(c) for c in files])
+    return len(files)
+
+
+async def _probe_server_actions(base_url: str, action_ids: list[str], client) -> list:
+    """
+    Actively confirm action ids: POST the page with a Next-Action header.
+    NOTE: may execute the action server-side — only run when explicitly enabled.
+    """
+    sem = asyncio.Semaphore(5)
+
+    async def one(action_id: str) -> dict:
+        async with sem:
+            headers = {"Next-Action": action_id, "Content-Type": "text/plain;charset=UTF-8"}
+            try:
+                r = await client.post(base_url, headers=headers, content="[]",
+                                      timeout=_T_FAST, follow_redirects=False)
+            except Exception as e:
+                return {"id": action_id, "valid": None, "error": str(e)}
+            body = r.text[:4000].lower()
+            hdrs = {k.lower(): v for k, v in r.headers.items()}
+            if "failed to find server action" in body:
+                return {"id": action_id, "valid": False, "status": r.status_code}
+            if r.status_code in (200, 201, 303) or any(h.startswith("x-action") for h in hdrs):
+                return {"id": action_id, "valid": True, "status": r.status_code,
+                        "x_action_redirect": hdrs.get("x-action-redirect")}
+            return {"id": action_id, "valid": None, "status": r.status_code}
+
+    return list(await asyncio.gather(*[one(a) for a in action_ids]))
+
+
+async def process_server_actions(
+    domain_dir: Path,
+    base_url: str,
+    client,
+    page_actions: list | None = None,
+    build_id: str | None = None,
+    probe: bool = False,
+) -> dict:
+    """
+    Collect Next.js Server Action IDs from every available source:
+      - rendered HTML / flight data (from Playwright)      → html
+      - downloaded JS chunks        (domain_dir/js)        → js
+      - restored sources            (domain_dir/sources)   → sources (+ "use server" modules)
+      - /_next/data responses       (domain_dir/next_data) → next_data
+      - Next.js manifests           (server-reference)     → manifest
+      - chunks from app-build-manifest                     → chunk_enum
+      - active POST confirmation (opt-in)                  → probe
+    Writes server_actions.json and returns its contents.
+    """
+    actions: dict[str, dict] = {}
+    signals: dict[str, int] = {}
+    modules: dict[str, dict] = {}
+    methods: dict[str, int] = {}
+
+    for rec in (page_actions or []):
+        if rec.get("id") and rec["id"] not in actions:
+            actions[rec["id"]] = rec
+    if actions:
+        methods["html"] = len(actions)
+
+    def _scan_dir(directory: Path, source: str, suffixes: tuple) -> int:
+        if not directory.exists():
+            return 0
+        hits = 0
+        for f in sorted(directory.rglob("*")):
+            if not f.is_file() or (suffixes and f.suffix.lower() not in suffixes):
+                continue
+            try:
+                hits += _scan_server_actions_text(
+                    f.read_text(encoding="utf-8", errors="replace"),
+                    source, str(f.relative_to(domain_dir)), actions, signals, modules,
+                )
+            except Exception:
+                pass
+        return hits
+
+    before = len(actions); _scan_dir(domain_dir / "js",        "js",        (".js", ".mjs", ".cjs"));        methods["js"] = len(actions) - before
+    before = len(actions); _scan_dir(domain_dir / "sources",   "sources",   (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")); methods["sources"] = len(actions) - before
+    before = len(actions); _scan_dir(domain_dir / "next_data", "next_data", (".json",));                       methods["next_data"] = len(actions) - before
+
+    # ── Manifests (server-reference / app-build) ─────────────────────────────
+    manifest_urls: list[str] = []
+    try:
+        manifests = await _fetch_next_manifests(base_url, build_id, client)
+    except Exception:
+        manifests = {}
+    for url, data in manifests.items():
+        manifest_urls.append(url)
+        if "server-reference-manifest" in url:
+            before = len(actions)
+            _scan_server_reference_manifest(url, data, actions)
+            methods["manifest"] = methods.get("manifest", 0) + (len(actions) - before)
+        if "app-build-manifest" in url:
+            try:
+                fetched = await _enum_and_scan_chunks(base_url, data, actions, signals, client)
+                if fetched:
+                    methods["chunk_enum"] = methods.get("chunk_enum", 0) + fetched
+            except Exception:
+                pass
+
+    # ── Active confirmation (opt-in) ─────────────────────────────────────────
+    probes: list[dict] = []
+    if probe and actions:
+        try:
+            probes = await _probe_server_actions(base_url, sorted(actions), client)
+            for p in probes:
+                if p.get("id") in actions and p.get("valid") is not None:
+                    actions[p["id"]]["valid"] = p["valid"]
+            methods["probe"] = sum(1 for p in probes if p.get("valid"))
+        except Exception:
+            probes = []
+
+    info = {
+        "base_url": base_url,
+        "build_id": build_id,
+        "detected": bool(actions),
+        "count":    len(actions),
+        "methods":  methods,
+        "signals":  signals,
+        "manifests": manifest_urls,
+        "modules":  [{"file": f, "exports": m["exports"]} for f, m in sorted(modules.items())],
+        "probes":   probes,
+        "actions":  sorted(actions.values(), key=lambda a: a["id"]),
+    }
+    (domain_dir / "server_actions.json").write_text(
+        json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    return info
+
+
 # ─── Entry point ─────────────────────────────────────────────────────────────
 
 
@@ -1657,6 +1978,9 @@ async def main():
                         help="Crawl mode: none=single page; medium=interact+scroll; deep=follow internal links")
     parser.add_argument("--crawl-depth", type=int, default=10,
                         help="Max pages to visit in deep crawl mode (default: 10)")
+    parser.add_argument("--probe-actions", action="store_true",
+                        help="Actively confirm Server Action IDs via POST + Next-Action header "
+                             "(WARNING: may execute actions server-side)")
     args = parser.parse_args()
 
     # Load target(s)
@@ -1705,6 +2029,10 @@ async def main():
 
     headers = parse_headers(args.header)
 
+    if args.probe_actions:
+        print("[!] --probe-actions enabled: Server Actions will be actively invoked (POST + Next-Action). "
+              "This may trigger side effects on the target.", file=sys.stderr)
+
     sem = asyncio.Semaphore(args.concurrency)
     # ProcessPoolExecutor for Playwright — each browser in isolated process
     # Prevents event loop blocking when a browser hangs
@@ -1720,6 +2048,7 @@ async def main():
             pw_executor=pw_executor,
             crawl_mode=args.crawl,
             crawl_depth=args.crawl_depth,
+            probe_actions=args.probe_actions,
         )
         for sub in pending_subdomains
     ]

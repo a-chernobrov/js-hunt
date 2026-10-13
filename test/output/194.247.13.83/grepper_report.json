@@ -1,0 +1,62 @@
+{
+  "files_scanned": 37,
+  "size_mb": 1.6,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/admin/print_client\"",
+        "line_no": 1,
+        "context": "_N_E=(window.webpackJsonp_N_E=window.webpackJsonp_N_E||[]).push([[41],{\"2qu3\":function(e,t,n){\"use strict\";var r=n(\"lSNA\"),i=n(\"lwsE\"),o=n(\"W8MJ\");function c(e,t){var n=Object.keys(e);if(Object.getOwn",
+        "note": null,
+        "file": "output/194.247.13.83/js/_next_static_chunks_pages_objekt_%5Bid%5D-ad442e380b3a727f484e.js",
+        "domain": "194.247.13.83",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/admin/print\"",
+        "line_no": 1,
+        "context": "_N_E=(window.webpackJsonp_N_E=window.webpackJsonp_N_E||[]).push([[41],{\"2qu3\":function(e,t,n){\"use strict\";var r=n(\"lSNA\"),i=n(\"lwsE\"),o=n(\"W8MJ\");function c(e,t){var n=Object.keys(e);if(Object.getOwn",
+        "note": null,
+        "file": "output/194.247.13.83/js/_next_static_chunks_pages_objekt_%5Bid%5D-ad442e380b3a727f484e.js",
+        "domain": "194.247.13.83",
+        "file_count": 1
+      }
+    ],
+    "External API Call": [
+      {
+        "value": "fetch(\"https://rieltor.ua/ajax/level-status/?id=361996\"",
+        "line_no": 1,
+        "context": "(window.webpackJsonp_N_E=window.webpackJsonp_N_E||[]).push([[6],{\"+2zh\":function(e,t,n){\"use strict\";n.d(t,\"a\",(function(){return h})),n.d(t,\"b\",(function(){return m}));var r=n(\"ODXe\"),o=n(\"4Cfr\"),a=n",
+        "note": null,
+        "file": "output/194.247.13.83/js/_next_static_chunks_4db253599c616fe2a9f6a1216e95cf0a07ce3728.02a188d410e6f2a4e51d.js",
+        "domain": "194.247.13.83",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {
+    "PHP Endpoint": [
+      {
+        "value": "\"https://www.facebook.com/sharer/sharer.php\"",
+        "line_no": 1,
+        "context": "_N_E=(window.webpackJsonp_N_E=window.webpackJsonp_N_E||[]).push([[41],{\"2qu3\":function(e,t,n){\"use strict\";var r=n(\"lSNA\"),i=n(\"lwsE\"),o=n(\"W8MJ\");function c(e,t){var n=Object.keys(e);if(Object.getOwn",
+        "note": null,
+        "file": "output/194.247.13.83/js/_next_static_chunks_pages_objekt_%5Bid%5D-ad442e380b3a727f484e.js",
+        "domain": "194.247.13.83",
+        "file_count": 1
+      }
+    ],
+    "Auth Endpoints": [
+      {
+        "value": "\"/login/",
+        "line_no": 54,
+        "context": "`),B)));var R=o.forwardRef((function(e,t){const n=Object(m.a)({props:e,name:\"MuiLinearProgress\"}),{className:r,color:o=\"primary\",value:a,valueBuffer:u,variant:d=\"indeterminate\"}=n,h=Object(i.a)(n,y),b",
+        "note": null,
+        "file": "output/194.247.13.83/js/_next_static_chunks_4db253599c616fe2a9f6a1216e95cf0a07ce3728.02a188d410e6f2a4e51d.js",
+        "domain": "194.247.13.83",
+        "file_count": 1
+      }
+    ]
+  }
+}

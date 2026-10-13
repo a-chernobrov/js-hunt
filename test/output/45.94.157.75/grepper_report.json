@@ -1,0 +1,58 @@
+{
+  "files_scanned": 13,
+  "size_mb": 0.573,
+  "secrets": {
+    "Bearer Token": [
+      {
+        "value": "\"Bearer 6a3241b9556f28e88017f6130d45a2f0f3617d17e900280a9edee589a33d95788b21f031d6b20cb283f1d0420975026104cd36c88466617b",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[72],{3072:(e,a,r)=>{\"use strict\";r.r(a),r.d(a,{default:()=>n});var t=r(5155),s=r(2115),c=r(5772),i=r(8129);r(7444);var d=r(6670),l=r(8500),o=r.",
+        "note": null,
+        "file": "output/45.94.157.75/js/_next_static_chunks_72.a8e31447ec05dbc4.js",
+        "domain": "45.94.157.75",
+        "file_count": 2
+      }
+    ]
+  },
+  "apis": {
+    "External API Call": [
+      {
+        "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/projects?sort=createdAt:desc&populate=*\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[72],{3072:(e,a,r)=>{\"use strict\";r.r(a),r.d(a,{default:()=>n});var t=r(5155),s=r(2115),c=r(5772),i=r(8129);r(7444);var d=r(6670),l=r(8500),o=r.",
+        "note": null,
+        "file": "output/45.94.157.75/js/_next_static_chunks_72.a8e31447ec05dbc4.js",
+        "domain": "45.94.157.75",
+        "file_count": 1
+      },
+      {
+        "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/competences?sort=createdAt:desc&populate=*\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+        "note": null,
+        "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+        "domain": "45.94.157.75",
+        "file_count": 1
+      },
+      {
+        "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/photo-reviews?sort=createdAt:desc&populate=image\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+        "note": null,
+        "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+        "domain": "45.94.157.75",
+        "file_count": 1
+      },
+      {
+        "value": "fetch(\"https://determined-desk-f2e043cadd.strapiapp.com/api/reviews?sort=createdAt:desc&populate=*\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{1333:(e,s,a)=>{\"use strict\";a.d(s,{default:()=>x});var i=a(5155),t=a(2115),r=a(7206),l=a(5772);a(8924);var c=a(6670);a(8420);let d=({isVi",
+        "note": null,
+        "file": "output/45.94.157.75/js/_next_static_chunks_app_page-ce84f7032713692c.js",
+        "domain": "45.94.157.75",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {}
+}

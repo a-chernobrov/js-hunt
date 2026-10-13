@@ -1,0 +1,379 @@
+{
+  "domain": "https://185.69.155.141",
+  "status": "error",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "http://185.69.155.141/_next/static/chunks/1074-67d4216917b8c526.js",
+    "http://185.69.155.141/_next/static/chunks/2514-efd66bab8cdae72e.js",
+    "http://185.69.155.141/_next/static/chunks/2829-aa3c1e9ff0a17be4.js",
+    "http://185.69.155.141/_next/static/chunks/4085-472045c1ce5ff75a.js",
+    "http://185.69.155.141/_next/static/chunks/4188-8c2bc5f4a6a839c6.js",
+    "http://185.69.155.141/_next/static/chunks/457b8330-3e02203c819ea021.js",
+    "http://185.69.155.141/_next/static/chunks/4938-52cdd514fff96e76.js",
+    "http://185.69.155.141/_next/static/chunks/5243-d567444885b35785.js",
+    "http://185.69.155.141/_next/static/chunks/6040-f6d6e8c3b23a12e9.js",
+    "http://185.69.155.141/_next/static/chunks/6191-23505a1ce87cd957.js",
+    "http://185.69.155.141/_next/static/chunks/6814-8865ef5ae7436a9a.js",
+    "http://185.69.155.141/_next/static/chunks/6884-d62c1979da34fbc5.js",
+    "http://185.69.155.141/_next/static/chunks/691-53acac2b40316d0f.js",
+    "http://185.69.155.141/_next/static/chunks/7114-cf2be8ed72d6f116.js",
+    "http://185.69.155.141/_next/static/chunks/7aa4777d-0e132deb3bcb464e.js",
+    "http://185.69.155.141/_next/static/chunks/8303-f35367e7742c8eea.js",
+    "http://185.69.155.141/_next/static/chunks/9375-69fc2b2719d9ab23.js",
+    "http://185.69.155.141/_next/static/chunks/9557-4e85b21453b64963.js",
+    "http://185.69.155.141/_next/static/chunks/app/layout-836f8b95d8d551da.js",
+    "http://185.69.155.141/_next/static/chunks/app/loading-1f01dfb9c43e6375.js",
+    "http://185.69.155.141/_next/static/chunks/app/not-found-790a97edd8d47faa.js",
+    "http://185.69.155.141/_next/static/chunks/bc9e92e6-e45e76c03fb7de52.js",
+    "http://185.69.155.141/_next/static/chunks/fd9d1056-c33815a09a20b591.js",
+    "http://185.69.155.141/_next/static/chunks/main-app-56614e8561f61156.js",
+    "http://185.69.155.141/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js",
+    "http://185.69.155.141/_next/static/chunks/webpack-626a59871d449919.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://185.69.155.141",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 26,
+    "js_playwright": 26,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 6,
+    "apis_count": 21,
+    "sensitive_count": 3
+  },
+  "grepper": {
+    "files_scanned": 26,
+    "size_mb": 1.97,
+    "secrets": {
+      "Password Assignment": [
+        {
+          "value": "PASSWORD:\"wrong-password\"",
+          "line_no": 91,
+          "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "PASSWORD:\"missing-password\"",
+          "line_no": 91,
+          "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ],
+      "Generic API Key": [
+        {
+          "value": "apiKey:this.auth.config.apiKey",
+          "line_no": 226,
+          "context": "*/function Y(e,t){v(\"string\"==typeof e||void 0===e,\"internal-error\",{appName:t})}class X{constructor(e){var{uid:t,auth:i,stsTokenManager:n}=e,r=(0,o._T)(e,[\"uid\",\"auth\",\"stsTokenManager\"]);this.provid",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "apiKey:this.config.apiKey",
+          "line_no": 346,
+          "context": "*/class ev{constructor(e,t,i,n){this.app=e,this.heartbeatServiceProvider=t,this.appCheckServiceProvider=i,this.config=n,this.currentUser=null,this.emulatorConfig=null,this.operations=Promise.resolve()",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "apiKey:\"AIzaSyBd8pbVAZjIawx4kfLm-LTMQeMC-9H8ZkI",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ],
+      "Google API Key": [
+        {
+          "value": "AIzaSyBd8pbVAZjIawx4kfLm-LTMQeMC-9H8ZkI",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+          "note": "public?",
+          "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ]
+    },
+    "apis": {
+      "API Route v1/v2/v3": [
+        {
+          "value": "\"/v2/recaptchaConfig\"",
+          "line_no": 91,
+          "context": "*/let k={CREDENTIAL_MISMATCH:\"custom-token-mismatch\",MISSING_CUSTOM_TOKEN:\"internal-error\",INVALID_IDENTIFIER:\"invalid-email\",MISSING_CONTINUE_URI:\"internal-error\",INVALID_PASSWORD:\"wrong-password\",MI",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:delete\"",
+          "line_no": 106,
+          "context": "*/async function U(e,t){return P(e,\"POST\",\"/v1/accounts:delete\",t)}async function V(e,t){return P(e,\"POST\",\"/v1/accounts:lookup\",t)}/**",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:lookup\"",
+          "line_no": 106,
+          "context": "*/async function U(e,t){return P(e,\"POST\",\"/v1/accounts:delete\",t)}async function V(e,t){return P(e,\"POST\",\"/v1/accounts:lookup\",t)}/**",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/token\"",
+          "line_no": 196,
+          "context": "*/async function G(e,t){let i=await O(e,{},async()=>{let i=(0,r.xO)({grant_type:\"refresh_token\",refresh_token:t}).slice(1),{tokenApiHost:n,apiKey:s}=e.config,a=b(e,n,\"/v1/token\",`key=${s}`),o=await e.",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/accounts:revokeToken\"",
+          "line_no": 196,
+          "context": "*/async function G(e,t){let i=await O(e,{},async()=>{let i=(0,r.xO)({grant_type:\"refresh_token\",refresh_token:t}).slice(1),{tokenApiHost:n,apiKey:s}=e.config,a=b(e,n,\"/v1/token\",`key=${s}`),o=await e.",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/passwordPolicy\"",
+          "line_no": 331,
+          "context": "*/async function em(e,t={}){return P(e,\"GET\",\"/v2/passwordPolicy\",R(e,t))}class eg{constructor(e){var t,i,n,r;let s=e.customStrengthOptions;this.customStrengthOptions={},this.customStrengthOptions.min",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:signUp\"",
+          "line_no": 361,
+          "context": "*/class eP{constructor(e,t){this.providerId=e,this.signInMethod=t}toJSON(){return _(\"not implemented\")}_getIdTokenResponse(e){return _(\"not implemented\")}_linkToIdToken(e,t){return _(\"not implemented\"",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:signInWithPassword\"",
+          "line_no": 376,
+          "context": "*/async function eC(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPassword\",R(e,t))}async function eb(e,t){return P(e,\"POST\",\"/v1/accounts:sendOobCode\",R(e,t))}async function eN(e,t){return eb(e,t)}a",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:sendOobCode\"",
+          "line_no": 376,
+          "context": "*/async function eC(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPassword\",R(e,t))}async function eb(e,t){return P(e,\"POST\",\"/v1/accounts:sendOobCode\",R(e,t))}async function eN(e,t){return eb(e,t)}a",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:signInWithEmailLink\"",
+          "line_no": 391,
+          "context": "*/async function eL(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithEmailLink\",R(e,t))}async function eD(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithEmailLink\",R(e,t))}/**",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:signInWithIdp\"",
+          "line_no": 421,
+          "context": "*/async function eU(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithIdp\",R(e,t))}class eV extends eP{constructor(){super(...arguments),this.pendingToken=null}static _fromParams(e){let t=new eV(e.provid",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:sendVerificationCode\"",
+          "line_no": 436,
+          "context": "*/async function ex(e,t){return P(e,\"POST\",\"/v1/accounts:sendVerificationCode\",R(e,t))}async function eF(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPhoneNumber\",R(e,t))}async function ej(e,t){let ",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/accounts:signInWithPhoneNumber\"",
+          "line_no": 436,
+          "context": "*/async function ex(e,t){return P(e,\"POST\",\"/v1/accounts:sendVerificationCode\",R(e,t))}async function eF(e,t){return C(e,\"POST\",\"/v1/accounts:signInWithPhoneNumber\",R(e,t))}async function ej(e,t){let ",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/accounts/mfaEnrollment:start\"",
+          "line_no": 811,
+          "context": "*/let tm=\"firebaseLocalStorageDb\",tg=\"firebaseLocalStorage\",tv=\"fbase_key\";class t_{constructor(e){this.request=e}toPromise(){return new Promise((e,t)=>{this.request.addEventListener(\"success\",()=>{e(",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/accounts/mfaSignIn:start\"",
+          "line_no": 811,
+          "context": "*/let tm=\"firebaseLocalStorageDb\",tg=\"firebaseLocalStorage\",tv=\"fbase_key\";class t_{constructor(e){this.request=e}toPromise(){return new Promise((e,t)=>{this.request.addEventListener(\"success\",()=>{e(",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v1/projects\"",
+          "line_no": 901,
+          "context": "*/async function t$(e,t={}){return P(e,\"GET\",\"/v1/projects\",t)}/**",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/accounts/mfaEnrollment:finalize\"",
+          "line_no": 961,
+          "context": "*/let t5=\"webStorageSupport\";class t9{constructor(){this.eventManagers={},this.iframes={},this.originValidationPromises={},this._redirectPersistence=tl,this._completeRedirectFn=tj,this._overrideRedire",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/v2/accounts/mfaSignIn:finalize\"",
+          "line_no": 961,
+          "context": "*/let t5=\"webStorageSupport\";class t9{constructor(){this.eventManagers={},this.iframes={},this.originValidationPromises={},this._redirectPersistence=tl,this._completeRedirectFn=tj,this._overrideRedire",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ],
+      "Template Literal API": [
+        {
+          "value": "`${i}/JsCore/",
+          "line_no": 301,
+          "context": "*/function ep(e,t=[]){let i;switch(e){case\"Browser\":i=en((0,r.z$)());break;case\"Worker\":i=`${en((0,r.z$)())}-${e}`;break;default:i=e}let n=t.length?t.join(\",\"):\"FirebaseCore-web\";return`${i}/JsCore/${",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7aa4777d-0e132deb3bcb464e.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "`${this.mo}/v1/",
+          "line_no": 1054,
+          "context": "*/let rY=\"WebChannelConnection\";class rX extends class{constructor(e){this.databaseInfo=e,this.databaseId=e.databaseId;let t=e.ssl?\"https\":\"http\",r=encodeURIComponent(this.databaseId.projectId),n=enco",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_bc9e92e6-e45e76c03fb7de52.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ],
+      "HTTP Method + Route": [
+        {
+          "value": "patch(\"/settings/users/\"",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7114],{55963:function(e,t,n){n.d(t,{Z:function(){return p}});var r=n(57437),o=n(2265),a=n(25577),i=n(50110),l=n(35843),c=n(89975);",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7114-cf2be8ed72d6f116.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {
+      "Config/Env": [
+        {
+          "value": "\"/settings/",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7114],{55963:function(e,t,n){n.d(t,{Z:function(){return p}});var r=n(57437),o=n(2265),a=n(25577),i=n(50110),l=n(35843),c=n(89975);",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_7114-cf2be8ed72d6f116.js",
+          "domain": "185.69.155.141",
+          "file_count": 3
+        }
+      ],
+      "Monitoring": [
+        {
+          "value": "\"/monitoring\"",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        },
+        {
+          "value": "\"/monitoring/",
+          "line_no": 1,
+          "context": "\"use strict\";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4085],{19956:function(e,t,a){a.d(t,{$8:function(){return m},$b:function(){return k},CS:function(){return u},D7:function(){return o",
+          "note": null,
+          "file": "output/185.69.155.141/js/_next_static_chunks_4085-472045c1ce5ff75a.js",
+          "domain": "185.69.155.141",
+          "file_count": 1
+        }
+      ]
+    }
+  }
+}

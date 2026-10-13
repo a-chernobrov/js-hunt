@@ -1,0 +1,96 @@
+{
+  "domain": "https://45.94.158.22",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://45.94.158.22/_next/static/chunks/1434-1ca8315bd4498a70.js",
+    "https://45.94.158.22/_next/static/chunks/1646-c26d80bb7dec4e24.js",
+    "https://45.94.158.22/_next/static/chunks/2117-8736f473ec5a5277.js",
+    "https://45.94.158.22/_next/static/chunks/2972-9189695a7947b0db.js",
+    "https://45.94.158.22/_next/static/chunks/541-c0fb3926663843a5.js",
+    "https://45.94.158.22/_next/static/chunks/545-f5cda342a405a5db.js",
+    "https://45.94.158.22/_next/static/chunks/5878-b450256cb3a6f765.js",
+    "https://45.94.158.22/_next/static/chunks/7171-1a9c0a3064580791.js",
+    "https://45.94.158.22/_next/static/chunks/8e1d74a4-75f1ea2fd157ace1.js",
+    "https://45.94.158.22/_next/static/chunks/app/cart/page-f89714e336e10ab1.js",
+    "https://45.94.158.22/_next/static/chunks/app/catalog/page-96628461522bee7a.js",
+    "https://45.94.158.22/_next/static/chunks/app/contacts/page-3c35990d253ad163.js",
+    "https://45.94.158.22/_next/static/chunks/app/delivery/page-bba8e1fdd880e0d3.js",
+    "https://45.94.158.22/_next/static/chunks/app/layout-a08c951aea52b45e.js",
+    "https://45.94.158.22/_next/static/chunks/app/page-96629c36e42b0fd6.js",
+    "https://45.94.158.22/_next/static/chunks/app/warranty/page-7d876b6dc5e62ad2.js",
+    "https://45.94.158.22/_next/static/chunks/fd9d1056-222a8ef27fde6954.js",
+    "https://45.94.158.22/_next/static/chunks/main-app-1bb997f2d26b2f8b.js",
+    "https://45.94.158.22/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "https://45.94.158.22/_next/static/chunks/webpack-a9a78e5936e4d970.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://45.94.158.22",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 20,
+    "js_playwright": 20,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 1,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 20,
+    "size_mb": 0.752,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/cars\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7043],{1899:function(e,t,n){Promise.resolve().then(n.bind(n,5540)),Promise.resolve().then(n.bind(n,4240)),Promise.resolve().then(n.bind(n,662))",
+          "note": null,
+          "file": "output/45.94.158.22/js/_next_static_chunks_app_catalog_page-96628461522bee7a.js",
+          "domain": "45.94.158.22",
+          "file_count": 2
+        }
+      ]
+    },
+    "sensitive": {}
+  }
+}

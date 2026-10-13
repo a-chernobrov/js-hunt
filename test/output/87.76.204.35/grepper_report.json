@@ -1,0 +1,46 @@
+{
+  "files_scanned": 6,
+  "size_mb": 0.403,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/draw\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[931],{9163:function(e,a,s){Promise.resolve().then(s.bind(s,6117))},6117:function(e,a,s){\"use strict\";s.r(a),s.d(a,{default:function(){return i}",
+        "note": null,
+        "file": "output/87.76.204.35/js/_next_static_chunks_app_page-00659aea43461299.js",
+        "domain": "87.76.204.35",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/health\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[931],{9163:function(e,a,s){Promise.resolve().then(s.bind(s,6117))},6117:function(e,a,s){\"use strict\";s.r(a),s.d(a,{default:function(){return i}",
+        "note": null,
+        "file": "output/87.76.204.35/js/_next_static_chunks_app_page-00659aea43461299.js",
+        "domain": "87.76.204.35",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/base\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[931],{9163:function(e,a,s){Promise.resolve().then(s.bind(s,6117))},6117:function(e,a,s){\"use strict\";s.r(a),s.d(a,{default:function(){return i}",
+        "note": null,
+        "file": "output/87.76.204.35/js/_next_static_chunks_app_page-00659aea43461299.js",
+        "domain": "87.76.204.35",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/export\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[931],{9163:function(e,a,s){Promise.resolve().then(s.bind(s,6117))},6117:function(e,a,s){\"use strict\";s.r(a),s.d(a,{default:function(){return i}",
+        "note": null,
+        "file": "output/87.76.204.35/js/_next_static_chunks_app_page-00659aea43461299.js",
+        "domain": "87.76.204.35",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {}
+}

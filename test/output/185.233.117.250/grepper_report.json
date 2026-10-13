@@ -1,0 +1,53 @@
+{
+  "files_scanned": 9,
+  "size_mb": 0.487,
+  "secrets": {
+    "Internal IPv4": [
+      {
+        "value": "http://localhost:3000/api/auth",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[6964],{63:(e,t,r)=>{\"use strict\";var n=r(7260);r.o(n,\"useParams\")&&r.d(t,{useParams:function(){return n.useParams}}),r.o(n,\"usePathname\")&&r.d(",
+        "note": null,
+        "file": "output/185.233.117.250/js/_next_static_chunks_6964-b6d73375f39445fb.js",
+        "domain": "185.233.117.250",
+        "file_count": 5
+      }
+    ]
+  },
+  "apis": {},
+  "sensitive": {
+    "Admin/Dashboard": [
+      {
+        "value": "\"/admin/",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4357],{4357:(e,a,t)=>{\"use strict\";t.d(a,{A:()=>b});var l,i=t(5155),d=t(6549),n=t(6598),s=t.n(n);let r=null!=(l=t(5704).env.NEXT_PUBLIC_THEME)?",
+        "note": null,
+        "file": "output/185.233.117.250/js/_next_static_chunks_4357-bffebce01fe1f3d2.js",
+        "domain": "185.233.117.250",
+        "file_count": 10
+      }
+    ],
+    "Health/Metrics": [
+      {
+        "value": "\"/health\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4357],{4357:(e,a,t)=>{\"use strict\";t.d(a,{A:()=>b});var l,i=t(5155),d=t(6549),n=t(6598),s=t.n(n);let r=null!=(l=t(5704).env.NEXT_PUBLIC_THEME)?",
+        "note": null,
+        "file": "output/185.233.117.250/js/_next_static_chunks_4357-bffebce01fe1f3d2.js",
+        "domain": "185.233.117.250",
+        "file_count": 2
+      }
+    ],
+    "Auth Endpoints": [
+      {
+        "value": "\"/signin?",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[6964],{63:(e,t,r)=>{\"use strict\";var n=r(7260);r.o(n,\"useParams\")&&r.d(t,{useParams:function(){return n.useParams}}),r.o(n,\"usePathname\")&&r.d(",
+        "note": null,
+        "file": "output/185.233.117.250/js/_next_static_chunks_6964-b6d73375f39445fb.js",
+        "domain": "185.233.117.250",
+        "file_count": 5
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "files_scanned": 27,
+  "size_mb": 0.99,
+  "secrets": {
+    "Password Assignment": [
+      {
+        "value": "password=\"%filtered%\"",
+        "line_no": 11,
+        "context": "`),\"string\"==typeof n||n instanceof Uint8Array)o(n);else{let e;try{e=JSON.stringify(n)}catch{e=JSON.stringify((0,i.Fv)(n))}o(e)}}return\"string\"==typeof r?r:function(e){let t=new Uint8Array(e.reduce((e",
+        "note": null,
+        "file": "output/31.131.17.232/js/_next_static_chunks_7893-2a5a5c95a79a6e97.js",
+        "domain": "31.131.17.232",
+        "file_count": 1
+      }
+    ]
+  },
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/search\"",
+        "line_no": 1,
+        "context": "!function(){try{var e=\"undefined\"!=typeof window?window:\"undefined\"!=typeof global?global:\"undefined\"!=typeof globalThis?globalThis:\"undefined\"!=typeof self?self:{},t=(new e.Error).stack;t&&(e._sentry",
+        "note": null,
+        "file": "output/31.131.17.232/js/_next_static_chunks_app_%5Blang%5D_layout-7fc61e6ba01ef7c1.js",
+        "domain": "31.131.17.232",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/products\"",
+        "line_no": 1,
+        "context": "!function(){try{var e=\"undefined\"!=typeof window?window:\"undefined\"!=typeof global?global:\"undefined\"!=typeof globalThis?globalThis:\"undefined\"!=typeof self?self:{},t=(new e.Error).stack;t&&(e._sentry",
+        "note": null,
+        "file": "output/31.131.17.232/js/_next_static_chunks_2676-2a25d01ec982b536.js",
+        "domain": "31.131.17.232",
+        "file_count": 3
+      }
+    ]
+  },
+  "sensitive": {
+    "PHP Endpoint": [
+      {
+        "value": "\"https://www.facebook.com/profile.php?id=100085472847797\"",
+        "line_no": 1,
+        "context": "!function(){try{var e=\"undefined\"!=typeof window?window:\"undefined\"!=typeof global?global:\"undefined\"!=typeof globalThis?globalThis:\"undefined\"!=typeof self?self:{},t=(new e.Error).stack;t&&(e._sentry",
+        "note": null,
+        "file": "output/31.131.17.232/js/_next_static_chunks_app_%5Blang%5D_layout-7fc61e6ba01ef7c1.js",
+        "domain": "31.131.17.232",
+        "file_count": 1
+      }
+    ]
+  }
+}

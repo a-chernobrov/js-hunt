@@ -1,0 +1,2 @@
+http://45.150.110.70/assets/js/api.js
+http://45.150.110.70/assets/js/main.js

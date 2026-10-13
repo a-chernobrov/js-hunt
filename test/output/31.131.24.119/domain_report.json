@@ -1,0 +1,182 @@
+{
+  "domain": "https://31.131.24.119",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://31.131.24.119/_next/static/chunks/001f3f6dd28c5c97.js",
+    "https://31.131.24.119/_next/static/chunks/00f8ef5f4e985e38.js",
+    "https://31.131.24.119/_next/static/chunks/25e456ed486c22a0.js",
+    "https://31.131.24.119/_next/static/chunks/27be19761b47051a.js",
+    "https://31.131.24.119/_next/static/chunks/301d74a7936d823e.js",
+    "https://31.131.24.119/_next/static/chunks/3da95f6b32447ee8.js",
+    "https://31.131.24.119/_next/static/chunks/539486080894cf5b.js",
+    "https://31.131.24.119/_next/static/chunks/568049f8b0cba92b.js",
+    "https://31.131.24.119/_next/static/chunks/621a20ea218964c3.js",
+    "https://31.131.24.119/_next/static/chunks/6518bfbf400d3345.js",
+    "https://31.131.24.119/_next/static/chunks/73d04820d187fd07.js",
+    "https://31.131.24.119/_next/static/chunks/87e50b61b2505b08.js",
+    "https://31.131.24.119/_next/static/chunks/89fb61f844de159f.js",
+    "https://31.131.24.119/_next/static/chunks/9e9ed20ed48678f9.js",
+    "https://31.131.24.119/_next/static/chunks/d23c146a340a2eea.js",
+    "https://31.131.24.119/_next/static/chunks/d2eba9665df71565.js",
+    "https://31.131.24.119/_next/static/chunks/d599c4b827715e36.js",
+    "https://31.131.24.119/_next/static/chunks/df4c57aa57803306.js",
+    "https://31.131.24.119/_next/static/chunks/e22bf1d23deac867.js",
+    "https://31.131.24.119/_next/static/chunks/e71f59c6c817804c.js",
+    "https://31.131.24.119/_next/static/chunks/e90dc1da82966529.js",
+    "https://31.131.24.119/_next/static/chunks/ee37b845113340de.js",
+    "https://31.131.24.119/_next/static/chunks/f41148e6b2e08071.js",
+    "https://31.131.24.119/_next/static/chunks/f71b9d4652e960ee.js",
+    "https://31.131.24.119/_next/static/chunks/fc79ce7c89576e49.js",
+    "https://31.131.24.119/_next/static/chunks/turbopack-4c7e93ce4a33c036.js",
+    "https://31.131.24.119/_next/static/chunks/turbopack-59d9c700b7b10702.js",
+    "https://31.131.24.119/_next/static/chunks/turbopack-fa0750d9373c701c.js",
+    "https://31.131.24.119/_next/static/uaV1gSI4ooQGrJLla4hcY/_buildManifest.js",
+    "https://31.131.24.119/_next/static/uaV1gSI4ooQGrJLla4hcY/_ssgManifest.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": {
+    "build_id": "uaV1gSI4ooQGrJLla4hcY",
+    "source": "page",
+    "manifest": "wordlist_brute",
+    "base_url": "https://31.131.24.119",
+    "data_base": "https://31.131.24.119/_next/data/uaV1gSI4ooQGrJLla4hcY/",
+    "manifest_url": "https://31.131.24.119/_next/static/uaV1gSI4ooQGrJLla4hcY/_buildManifest.js",
+    "routes": []
+  },
+  "server_actions": {
+    "base_url": "https://31.131.24.119",
+    "build_id": "uaV1gSI4ooQGrJLla4hcY",
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "server-reference-manifest": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 30,
+    "js_playwright": 30,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": true,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 6,
+    "sensitive_count": 2
+  },
+  "grepper": {
+    "files_scanned": 30,
+    "size_mb": 1.306,
+    "secrets": {},
+    "apis": {
+      "Template Literal API": [
+        {
+          "value": "`${a}/page",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,67398,(e,t,r)=>{\"use strict\";t.exports={}},10560,(e,t,r)=>{\"trimStart\"in String.prototyp",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_001f3f6dd28c5c97.js",
+          "domain": "31.131.24.119",
+          "file_count": 1
+        },
+        {
+          "value": "`${i}/page",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,67398,(e,t,r)=>{\"use strict\";t.exports={}},10560,(e,t,r)=>{\"trimStart\"in String.prototyp",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_001f3f6dd28c5c97.js",
+          "domain": "31.131.24.119",
+          "file_count": 1
+        },
+        {
+          "value": "`${tH}/uploads",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,38742,(e,t,n)=>{t.exports=function(e,t){for(var n=-1,r=null==e?0:e.length;++n<r&&!1!==t(",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_25e456ed486c22a0.js",
+          "domain": "31.131.24.119",
+          "file_count": 1
+        }
+      ],
+      "HTTP Method + Route": [
+        {
+          "value": "post(\"/auth/login\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,55536,e=>{\"use strict\";function t(e){return{factory:function(){return{}},props:e}}var r=",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_f41148e6b2e08071.js",
+          "domain": "31.131.24.119",
+          "file_count": 4
+        },
+        {
+          "value": "get(\"/auth/me\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,55536,e=>{\"use strict\";function t(e){return{factory:function(){return{}},props:e}}var r=",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_f41148e6b2e08071.js",
+          "domain": "31.131.24.119",
+          "file_count": 4
+        },
+        {
+          "value": "post(\"/open/order\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,55536,e=>{\"use strict\";function t(e){return{factory:function(){return{}},props:e}}var r=",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_f41148e6b2e08071.js",
+          "domain": "31.131.24.119",
+          "file_count": 3
+        }
+      ]
+    },
+    "sensitive": {
+      "Upload/File": [
+        {
+          "value": "\"/upload/",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,99213,e=>{\"use strict\";function t(e,t){if(t.length<e)throw TypeError(e+\" argument\"+(e>1?",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_3da95f6b32447ee8.js",
+          "domain": "31.131.24.119",
+          "file_count": 3
+        }
+      ],
+      "Kubernetes/API": [
+        {
+          "value": "\"/api/v1\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,55536,e=>{\"use strict\";function t(e){return{factory:function(){return{}},props:e}}var r=",
+          "note": null,
+          "file": "output/31.131.24.119/js/_next_static_chunks_f41148e6b2e08071.js",
+          "domain": "31.131.24.119",
+          "file_count": 5
+        }
+      ]
+    }
+  }
+}

@@ -194,13 +194,13 @@ def scan_file(args: tuple) -> dict:
     # Skip known Cloudflare challenge/CDN files — they generate false positives
     if _FP_SKIP_FILES.search(filepath.name):
         return {
-            "file": str(filepath), "domain": domain_label,
+            "file": str(Path(filepath).resolve()), "domain": domain_label,
             "size": 0, "beautified": False, "error": "skipped:fp",
             "secrets": {}, "apis": {}, "sensitive": {},
         }
 
     result = {
-        "file":      str(filepath),
+        "file":      str(Path(filepath).resolve()),
         "domain":    domain_label,
         "size":      0,
         "beautified": False,
@@ -326,6 +326,24 @@ def collect_vite_info(output: Path) -> dict:
     return vite_findings
 
 
+def collect_server_actions(output: Path) -> dict:
+    """Collect non-empty server_actions.json from all domain directories."""
+    findings = {}
+    for domain_dir in sorted(output.iterdir()):
+        if not domain_dir.is_dir():
+            continue
+        sa_file = domain_dir / "server_actions.json"
+        if not sa_file.exists():
+            continue
+        try:
+            data = json.loads(sa_file.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if data.get("count"):
+            findings[domain_dir.name] = data
+    return findings
+
+
 # ─── Report ──────────────────────────────────────────────────────────────────
 
 def _section(title: str):
@@ -437,6 +455,27 @@ def print_vite_summary(vite_data: dict):
                 print(f"      {col(C.DIM, f)}")
             if len(lfi_files) > 5:
                 print(f"      {col(C.DIM, f'... and {len(lfi_files)-5} more')}")
+
+    print(f"\n{col(C.BOLD, '#'*70)}\n")
+
+
+def print_server_actions_summary(sa_data: dict):
+    """Print Next.js Server Actions summary."""
+    if not sa_data:
+        return
+
+    print(f"\n{col(C.BOLD, '='*70)}")
+    print(f"  {col(C.BOLD, 'NEXT.JS SERVER ACTIONS')}")
+    print(col(C.BOLD, '='*70))
+
+    for domain, info in sa_data.items():
+        actions = info.get("actions", [])
+        count = info.get("count", len(actions))
+        print(f"\n  {col(C.BOLD, domain)}  {col(C.DIM, f'({count} action id(s))')}")
+        for a in actions[:10]:
+            print(f"    {col(C.GREEN, a.get('id', ''))}  {col(C.DIM, a.get('source', ''))}")
+        if len(actions) > 10:
+            print(f"    {col(C.DIM, f'... and {len(actions)-10} more')}")
 
     print(f"\n{col(C.BOLD, '#'*70)}\n")
 
@@ -676,6 +715,12 @@ def main():
         vite_data = collect_vite_info(output)
         print_vite_summary(vite_data)
 
+    # Next.js Server Actions summary
+    sa_data = {}
+    if not args.target:
+        sa_data = collect_server_actions(output)
+        print_server_actions_summary(sa_data)
+
     if args.save_txt:
         save_txt_report(summary, output)
 
@@ -695,6 +740,7 @@ def main():
             "apis":          dict(summary["all_apis"]),
             "sensitive":     dict(summary["all_sensitive"]),
             "vite":          vite_data,
+            "server_actions": sa_data,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"[*] JSON report saved: {out}")
 

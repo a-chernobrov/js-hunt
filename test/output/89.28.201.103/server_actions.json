@@ -1,0 +1,16 @@
+{
+  "base_url": "https://89.28.201.103",
+  "build_id": null,
+  "detected": false,
+  "count": 0,
+  "methods": {
+    "js": 0,
+    "sources": 0,
+    "next_data": 0
+  },
+  "signals": {},
+  "manifests": [],
+  "modules": [],
+  "probes": [],
+  "actions": []
+}

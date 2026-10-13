@@ -1,0 +1,40 @@
+{
+  "files_scanned": 8,
+  "size_mb": 0.555,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/wishlist\"",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,77229,t=>{\"use strict\";var e=t.i(43476),o=t.i(71645),r=t.i(18566);t.s([\"default\",0,funct",
+        "note": null,
+        "file": "output/5.102.37.67/js/_next_static_chunks_3vzzdzv7cltpr.js",
+        "domain": "5.102.37.67",
+        "file_count": 1
+      },
+      {
+        "value": "\"/api/auth/logout\"",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,22016,(e,t,r)=>{\"use strict\";e.i(47167),Object.defineProperty(r,\"__esModule\",{value:!0})",
+        "note": null,
+        "file": "output/5.102.37.67/js/_next_static_chunks_1zzmey5blsba1.js",
+        "domain": "5.102.37.67",
+        "file_count": 1
+      }
+    ]
+  },
+  "sensitive": {
+    "Auth Endpoints": [
+      {
+        "value": "\"/login?",
+        "line_no": 1,
+        "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,77229,t=>{\"use strict\";var e=t.i(43476),o=t.i(71645),r=t.i(18566);t.s([\"default\",0,funct",
+        "note": null,
+        "file": "output/5.102.37.67/js/_next_static_chunks_3vzzdzv7cltpr.js",
+        "domain": "5.102.37.67",
+        "file_count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "domain": "https://45.94.156.231",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://45.94.156.231/_next/static/chunks/1255-d90f22433f14e976.js",
+    "https://45.94.156.231/_next/static/chunks/2619-38012e79151e370a.js",
+    "https://45.94.156.231/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+    "https://45.94.156.231/_next/static/chunks/5239-94e7cfe7dea4ac50.js",
+    "https://45.94.156.231/_next/static/chunks/6589-862ddee395c81c9d.js",
+    "https://45.94.156.231/_next/static/chunks/6856-5e9873b56320cb5a.js",
+    "https://45.94.156.231/_next/static/chunks/9301-9f0c9f42934a3d37.js",
+    "https://45.94.156.231/_next/static/chunks/app/catalog/page-e7c6897988f15bc3.js",
+    "https://45.94.156.231/_next/static/chunks/app/contacts/page-6c0ba5eebd93c82b.js",
+    "https://45.94.156.231/_next/static/chunks/app/delivery/page-888dd89c55fc585a.js",
+    "https://45.94.156.231/_next/static/chunks/app/global-error-4f281a174b4f522f.js",
+    "https://45.94.156.231/_next/static/chunks/app/layout-897683b7836dc0e3.js",
+    "https://45.94.156.231/_next/static/chunks/app/oferta/page-89a9124b1ed372db.js",
+    "https://45.94.156.231/_next/static/chunks/app/page-842c0d07c938db4e.js",
+    "https://45.94.156.231/_next/static/chunks/main-app-724eccd7cf12de57.js",
+    "https://45.94.156.231/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "https://45.94.156.231/_next/static/chunks/webpack-f22d1eaac6efc1a5.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://45.94.156.231",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 17,
+    "js_playwright": 17,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 2,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 17,
+    "size_mb": 0.538,
+    "secrets": {},
+    "apis": {
+      "REST Resource": [
+        {
+          "value": "\"/api/auth/providers\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9301],{4117:(e,t,r)=>{\"use strict\";r.d(t,{CartProvider:()=>c,_:()=>d});var a=r(5155),n=r(2115);let i=\"lospepes-cart\",s=\"lospepes-checkout\";func",
+          "note": null,
+          "file": "output/45.94.156.231/js/_next_static_chunks_9301-9f0c9f42934a3d37.js",
+          "domain": "45.94.156.231",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/contact-manager\"",
+          "line_no": 1,
+          "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7177],{428:e=>{e.exports={root:\"ManagerContactWidget_root__vdqfJ\",launcher:\"ManagerContactWidget_launcher__3XTkP\",overlay:\"ManagerContactWidget",
+          "note": null,
+          "file": "output/45.94.156.231/js/_next_static_chunks_app_layout-897683b7836dc0e3.js",
+          "domain": "45.94.156.231",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {}
+  }
+}

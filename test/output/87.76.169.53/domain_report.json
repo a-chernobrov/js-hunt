@@ -1,0 +1,236 @@
+{
+  "domain": "https://87.76.169.53",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://87.76.169.53/_next/static/chunks/0cz1d0mv5g_q7.js",
+    "https://87.76.169.53/_next/static/chunks/0keqntoah7x39.js",
+    "https://87.76.169.53/_next/static/chunks/19ywzu1wfazk1.js",
+    "https://87.76.169.53/_next/static/chunks/1dcfivfvnmt6i.js",
+    "https://87.76.169.53/_next/static/chunks/1xwgx_343x0lg.js",
+    "https://87.76.169.53/_next/static/chunks/1ykyfpptru9kk.js",
+    "https://87.76.169.53/_next/static/chunks/242x7dx0zu3hf.js",
+    "https://87.76.169.53/_next/static/chunks/251vtxrh7ewhy.js",
+    "https://87.76.169.53/_next/static/chunks/2enq4c-xh9x0u.js",
+    "https://87.76.169.53/_next/static/chunks/2jjnafy-v_mvn.js",
+    "https://87.76.169.53/_next/static/chunks/2l47i2_busftn.js",
+    "https://87.76.169.53/_next/static/chunks/2lncb6yvn354i.js",
+    "https://87.76.169.53/_next/static/chunks/2nn7kihcf5ahp.js",
+    "https://87.76.169.53/_next/static/chunks/2wfr54musd2ol.js",
+    "https://87.76.169.53/_next/static/chunks/3h05yt71y-n-z.js",
+    "https://87.76.169.53/_next/static/chunks/3iz-tahlvrdov.js",
+    "https://87.76.169.53/_next/static/chunks/3nz_0jtqx8lys.js",
+    "https://87.76.169.53/_next/static/chunks/3p28yk5g3cqo-.js",
+    "https://87.76.169.53/_next/static/chunks/3w1oyjf-0wcdc.js",
+    "https://87.76.169.53/_next/static/chunks/turbopack-2c3mg3r-05n1w.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://87.76.169.53",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 20,
+    "js_playwright": 20,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 15,
+    "sensitive_count": 1
+  },
+  "grepper": {
+    "files_scanned": 11,
+    "size_mb": 0.923,
+    "secrets": {},
+    "apis": {
+      "Template Literal API": [
+        {
+          "value": "`${n}/api/public/branding",
+          "line_no": 1,
+          "context": "(()=>{\"use strict\";(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,728231,e=>{var t=e.i(843476),r=e.i(647163),n=e.i(225913),o=e.i(271645",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_3p28yk5g3cqo-.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "`${d}/api/auth/refresh",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "`${d}/api/auth/login",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "`${d}/api/auth/login/2fa",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "`${d}/api/auth/logout",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        }
+      ],
+      "Fetch/Axios Template": [
+        {
+          "value": "fetch(`${n}/api/public/branding",
+          "line_no": 1,
+          "context": "(()=>{\"use strict\";(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,728231,e=>{var t=e.i(843476),r=e.i(647163),n=e.i(225913),o=e.i(271645",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_3p28yk5g3cqo-.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(`${d}/api/auth/refresh",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(`${d}/api/auth/login",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(`${d}/api/auth/login/2fa",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "fetch(`${d}/api/auth/logout",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        }
+      ],
+      "REST Resource": [
+        {
+          "value": "\"/api/notifications/read-all\"",
+          "line_no": 1,
+          "context": "(()=>{\"use strict\";(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,540985,e=>{var t=e.i(843476),a=e.i(271645),r=e.i(618393),n=e.i(727612",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_3nz_0jtqx8lys.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/notifications\"",
+          "line_no": 1,
+          "context": "(()=>{\"use strict\";(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,540985,e=>{var t=e.i(843476),a=e.i(271645),r=e.i(618393),n=e.i(727612",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_3nz_0jtqx8lys.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/auth/me\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,[663398,633922,t=>{var e=t.i(843476),a=t.i(271645),r=t.i(618566);let o=\"idle_signout_min",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1xwgx_343x0lg.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/notifications/unread-count\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,901701,t=>{\"use strict\";let e,i,s;var n,r=t.i(843476),a=t.i(271645),o=t.i(829939),l=t.i(",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1dcfivfvnmt6i.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        },
+        {
+          "value": "\"/api/auth/impersonation/end\"",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,901701,t=>{\"use strict\";let e,i,s;var n,r=t.i(843476),a=t.i(271645),o=t.i(829939),l=t.i(",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1dcfivfvnmt6i.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        }
+      ]
+    },
+    "sensitive": {
+      "Upload/File": [
+        {
+          "value": "\"/media/",
+          "line_no": 1,
+          "context": "(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push([\"object\"==typeof document?document.currentScript:void 0,901701,t=>{\"use strict\";let e,i,s;var n,r=t.i(843476),a=t.i(271645),o=t.i(829939),l=t.i(",
+          "note": null,
+          "file": "output/87.76.169.53/js/_next_static_chunks_1dcfivfvnmt6i.js",
+          "domain": "87.76.169.53",
+          "file_count": 1
+        }
+      ]
+    }
+  }
+}

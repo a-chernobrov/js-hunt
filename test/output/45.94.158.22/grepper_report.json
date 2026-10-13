@@ -1,0 +1,19 @@
+{
+  "files_scanned": 20,
+  "size_mb": 0.752,
+  "secrets": {},
+  "apis": {
+    "REST Resource": [
+      {
+        "value": "\"/api/cars\"",
+        "line_no": 1,
+        "context": "(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[7043],{1899:function(e,t,n){Promise.resolve().then(n.bind(n,5540)),Promise.resolve().then(n.bind(n,4240)),Promise.resolve().then(n.bind(n,662))",
+        "note": null,
+        "file": "output/45.94.158.22/js/_next_static_chunks_app_catalog_page-96628461522bee7a.js",
+        "domain": "45.94.158.22",
+        "file_count": 2
+      }
+    ]
+  },
+  "sensitive": {}
+}

@@ -1,0 +1,74 @@
+{
+  "domain": "https://62.149.5.166",
+  "status": "processed",
+  "cloudflare": false,
+  "js_urls_playwright": [
+    "https://62.149.5.166/_next/static/chunks/596-fcc634caec9d7d7d.js",
+    "https://62.149.5.166/_next/static/chunks/748-1f1e406dbd5b660c.js",
+    "https://62.149.5.166/_next/static/chunks/869-605beca13a9a118a.js",
+    "https://62.149.5.166/_next/static/chunks/975-edd8eb34c25cf09d.js",
+    "https://62.149.5.166/_next/static/chunks/app/%5Blocale%5D/layout-9b27258d61a2517e.js",
+    "https://62.149.5.166/_next/static/chunks/app/%5Blocale%5D/page-ff5b87500707c2d7.js",
+    "https://62.149.5.166/_next/static/chunks/fd9d1056-d3a7e7c64c208153.js",
+    "https://62.149.5.166/_next/static/chunks/main-app-edd961426bd11f4c.js",
+    "https://62.149.5.166/_next/static/chunks/polyfills-78c92fac7aa8fdd8.js",
+    "https://62.149.5.166/_next/static/chunks/webpack-aad95725122bf89b.js"
+  ],
+  "js_urls_bruted": [],
+  "sources": [],
+  "sourcemaps": [],
+  "vite": null,
+  "nextjs": null,
+  "server_actions": {
+    "base_url": "https://62.149.5.166",
+    "build_id": null,
+    "detected": false,
+    "count": 0,
+    "methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "signals": {
+      "next-action header": 1,
+      "use server directive": 1,
+      "flight data __next_f": 1
+    },
+    "manifests": [],
+    "modules": [],
+    "probes": [],
+    "actions": []
+  },
+  "summary": {
+    "js_count": 10,
+    "js_playwright": 10,
+    "js_bruted": 0,
+    "has_sources": false,
+    "sources_count": 0,
+    "has_sourcemaps": false,
+    "sourcemaps_count": 0,
+    "has_vite": false,
+    "vite_cves": [],
+    "vite_lfi_count": 0,
+    "has_nextjs": false,
+    "nextjs_routes": 0,
+    "has_server_actions": false,
+    "server_actions_count": 0,
+    "server_actions_methods": {
+      "js": 0,
+      "sources": 0,
+      "next_data": 0
+    },
+    "cloudflare": false,
+    "secrets_count": 0,
+    "apis_count": 0,
+    "sensitive_count": 0
+  },
+  "grepper": {
+    "files_scanned": 10,
+    "size_mb": 0.513,
+    "secrets": {},
+    "apis": {},
+    "sensitive": {}
+  }
+}
