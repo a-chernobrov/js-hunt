@@ -5,6 +5,7 @@ Usage: python3 js_recon.py -f subdomains.txt [-w wordlist.txt] [-t 10] [-o outpu
 """
 
 import asyncio
+import os
 import shutil
 import argparse
 import sys
@@ -227,14 +228,30 @@ SERVER_ACTION_SIGNAL_PATTERNS = {
     "flight data __next_f":      re.compile(r"__next_f"),
 }
 
-USE_SERVER_RE   = re.compile(r"""^\s*(?:(?://[^\n]*|/\*.*?\*/)\s*)*["']use server["']""", re.S)
+def _strip_leading_comments(text: str) -> str:
+    """Skip leading whitespace and //, /* */ comments. Linear — no ReDoS."""
+    i, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        if c.isspace():
+            i += 1
+        elif text.startswith("//", i):
+            j = text.find("\n", i)
+            i = n if j == -1 else j + 1
+        elif text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            i = n if j == -1 else j + 2
+        else:
+            break
+    return text[i:]
 EXPORT_FN_RE    = re.compile(r"export\s+(?:default\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)")
 EXPORT_NAMED_RE = re.compile(r"export\s*\{([^}]*)\}")
 
 
 def _extract_use_server_module(text: str) -> dict | None:
     """Return exported names if the source file is a `"use server"` action module."""
-    if not USE_SERVER_RE.match(text[:2000]):
+    head = _strip_leading_comments(text[:2000])
+    if not (head.startswith('"use server"') or head.startswith("'use server'")):
         return None
     exports = set(EXPORT_FN_RE.findall(text))
     for block in EXPORT_NAMED_RE.findall(text):
@@ -292,7 +309,8 @@ def _playwright_worker(
     import asyncio
     import traceback
     import sys
-    from cloakbrowser import launch
+    import contextlib
+    from camoufox.sync_api import Camoufox
     from urllib.parse import urlparse as _urlparse
 
     js_urls: list[str] = []
@@ -300,21 +318,28 @@ def _playwright_worker(
     page_loaded = False
     page_actions: list = []
 
-    pw_headers = {"Accept-Language": "en-US,en;q=0.9"}
-    pw_ua = UA
-    if custom_headers:
-        if "User-Agent" in custom_headers:
-            pw_ua = custom_headers.pop("User-Agent")
-        pw_headers.update(custom_headers)
+    # Camoufox generates a UA / Accept-Language consistent with its fingerprint,
+    # so we don't override them here — a custom UA would break the spoof.
+    pw_headers = dict(custom_headers or {})
+    pw_headers.pop("User-Agent", None)
 
     browser = None
     ctx = None
     page = None
+    _stack = contextlib.ExitStack()
     try:
         _debug_event("B", "browser launch started", {"url": url, "timeout": timeout, "headless": True})
-        browser = launch(humanize=True, human_preset="careful", headless=True)
+        # Firefox's content sandbox needs unprivileged user namespaces, which are
+        # commonly blocked (AppArmor / sandbox) — otherwise the browser fails to
+        # start and Playwright hangs forever waiting for it.
+        os.environ.setdefault("MOZ_DISABLE_CONTENT_SANDBOX", "1")
+        os.environ.setdefault("MOZ_SANDBOX", "0")
+        _humanize = os.environ.get("JSRECON_HUMANIZE", "1").lower() not in ("0", "false", "no", "off")
+        browser = _stack.enter_context(Camoufox(
+            headless=True,
+            humanize=_humanize,
+        ))
         ctx = browser.new_context(
-            user_agent=pw_ua,
             ignore_https_errors=True,
             extra_http_headers=pw_headers,
         )
@@ -578,12 +603,16 @@ def _playwright_worker(
     except Exception:
         traceback.print_exc(file=sys.stderr)
     finally:
-        for resource in (page, ctx, browser):
+        for resource in (page, ctx):
             if resource is not None:
                 try:
                     resource.close()
                 except Exception:
                     pass
+        try:
+            _stack.close()
+        except Exception:
+            pass
 
     return js_urls, page_build_id, session_cookies, is_cloudflare, page_loaded, page_actions
 
